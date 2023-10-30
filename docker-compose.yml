@@ -1,0 +1,23 @@
+version: '3'
+
+services:
+  asa_server:
+    tty: true
+    container_name: asa_server
+    build:
+      context: .
+    env_file:
+      - .env
+    volumes:
+      - ./ShooterGame:/opt/arkserver/ShooterGame
+      - /opt/steamcmd
+    ports:
+      # Port for connections from ARK game client
+      - "${SERVER_PORT}:${SERVER_PORT}/udp"
+    networks:
+      - default
+    deploy:
+      resources:
+        limits:
+          memory: 16g
+    memswap_limit: 16g
