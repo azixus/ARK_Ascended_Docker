@@ -28,7 +28,7 @@ status() {
         echo "Server is up"
         num_players=0
         if [[ "$out" != "No Players"* ]]; then
-            num_players=$(echo -n "$out" | wc -l)
+            num_players=$(echo "$out" | wc -l)
         fi
         echo "$num_players players connected"
     else
@@ -60,7 +60,6 @@ stop() {
     echo "Stopping server gracefully..."
     echo "-------- STOPPING SERVER --------" >> $LOG_FILE
 
-    # Check number of players
     out=$(${RCON_CMDLINE} DoExit 2>/dev/null)
     res=$?
     force=false
