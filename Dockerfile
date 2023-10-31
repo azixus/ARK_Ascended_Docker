@@ -30,7 +30,7 @@ RUN         set -ex; \
             dpkg --add-architecture i386; \
             apt update; \
             apt install -y --no-install-recommends wget iproute2 gnupg2 software-properties-common libntlm0 winbind xvfb xauth libncurses5-dev:i386 libncurses6 dbus libgdiplus lib32gcc-s1; \
-            apt install -y alsa-tools libpulse0 pulseaudio libpulse-dev libasound2 libao-common gnutls-bin gnupg locales numactl cabextract curl python3 python3-pip python3-setuptools sudo
+            apt install -y alsa-tools libpulse0 pulseaudio libpulse-dev libasound2 libao-common gnutls-bin gnupg locales numactl cabextract curl python3 python3-pip python3-setuptools sudo procps
 
 # Download steamcmd
 RUN         set -ex; \
@@ -66,5 +66,8 @@ RUN         set -ex; \
 USER        arkuser
 WORKDIR     /home/arkuser
 
-COPY --chown=arkuser ./entrypoint.sh /entrypoint.sh
+COPY --chown=arkuser --chmod=755 ./scripts/entrypoint.sh /entrypoint.sh
+COPY --chown=arkuser --chmod=755 ./scripts/manager.sh /usr/local/bin/manager
+COPY --chown=arkuser --chmod=755 ./scripts/start.sh /opt/arkserver/start.sh
+
 CMD         ["/bin/bash", "/entrypoint.sh"]
