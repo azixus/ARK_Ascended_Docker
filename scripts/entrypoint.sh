@@ -1,5 +1,4 @@
 #!/bin/bash
-ASA_APPID=2430930
 set -ex
 
 # Create steam directory and set variables

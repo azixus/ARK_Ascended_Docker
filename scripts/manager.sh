@@ -41,6 +41,8 @@ start() {
     echo "-------- STARTING SERVER --------" >> $LOG_FILE
 
     nohup bash /opt/arkserver/start.sh >/dev/null 2>&1 &
+    sleep 3
+
     echo "Server should be up in a few minutes"
 }
 
@@ -108,9 +110,19 @@ saveworld() {
     fi
 }
 
-rcon() {
-    out=$(${RCON_CMDLINE} ${@:1:99} 2>/dev/null)
+custom_rcon() {
+    out=$(${RCON_CMDLINE} "${@}" 2>/dev/null)
     echo "$out"
+}
+
+update() {
+    echo "Updating ARK Ascended Server"
+    
+    stop --saveworld
+    /opt/steamcmd/steamcmd.sh +force_install_dir /opt/arkserver +login anonymous +app_update 2430930 validate +quit
+
+    echo "Update completed"
+    start
 }
 
 # Main function
@@ -134,11 +146,14 @@ main() {
         "saveworld")
             saveworld
             ;;
-        "rcon") add rcon custom
-            rcon
+        "rcon")
+            custom_rcon "${@:2:99}"
+            ;;
+        "update") 
+            update
             ;;
         *)
-            echo "Invalid action. Supported actions: status, stop, restart."
+            echo "Invalid action. Supported actions: status, start, stop, restart, saveworld, rcon, update."
             exit 1
             ;;
     esac

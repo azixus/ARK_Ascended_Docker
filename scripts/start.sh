@@ -1,4 +1,3 @@
-ASA_APPID=2430930
 export STEAM_COMPAT_CLIENT_INSTALL_PATH="/home/arkuser/.steam/steam"
 export STEAM_COMPAT_DATA_PATH="/home/arkuser/.steam/steam/steamapps/compatdata/${ASA_APPID}"
 
