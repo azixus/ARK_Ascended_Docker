@@ -14,6 +14,7 @@ Start the container by cloning the repo and executing `docker-compose up`:
 ```bash
 $ git clone git@github.com:AziXus/ASA_Server_Docker.git
 $ cd ASA_Server_Docker
+$ sudo chown -R 1000:1000 ./ShooterGame
 $ docker compose up --build
 ```
 
