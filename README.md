@@ -12,10 +12,10 @@ Unlike ARK Survival Evolved, only one port must be exposed to the internet, name
 ### Usage
 Start the container by cloning the repo and executing `docker-compose up`:
 ```bash
-$ git clone git@github.com:AziXus/ASA_Server_Docker.git
+$ git clone https://github.com/AziXus/ASA_Server_Docker.git
 $ cd ASA_Server_Docker
 $ sudo chown -R 1000:1000 ./ShooterGame
-$ docker compose up --build
+$ docker compose up --build -d
 ```
 
 During the startup of the container, the ASA server is automatically downloaded with `steamcmd`, *but not started*. You can monitor the progress with the following command:
