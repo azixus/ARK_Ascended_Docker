@@ -9,8 +9,8 @@ services:
     env_file:
       - .env
     volumes:
-      - ./ShooterGame:/opt/arkserver/ShooterGame
-      - /opt/steamcmd
+      - shooter_game:/opt/arkserver
+      - steam:/home/arkuser/.steam
     ports:
       # Port for connections from ARK game client
       - "${SERVER_PORT}:${SERVER_PORT}/udp"
@@ -21,3 +21,7 @@ services:
         limits:
           memory: 16g
     memswap_limit: 16g
+
+volumes:
+    shooter_game:
+    steam:
