@@ -14,6 +14,8 @@ services:
     ports:
       # Port for connections from ARK game client
       - "${SERVER_PORT}:${SERVER_PORT}/udp"
+      #uncomment if you want to expose the RCON Port
+      #- "${RCON_PORT}:${RCON_PORT}/tcp"
     networks:
       - default
     deploy:

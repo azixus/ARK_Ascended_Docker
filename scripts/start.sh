@@ -47,9 +47,12 @@ if [ -n ${MAX_PLAYERS} ]; then
     ark_flags="${ark_flags} -WinLiveMaxPlayers=${MAX_PLAYERS}"
 fi
 
+# Install mods
+if [ -n "$MODS" ]; then
+    ark_flags="${ark_flags} -automanagedmods -mods=${MODS}"
+fi
+
 ark_flags="${ark_flags} ${ARK_EXTRA_DASH_OPTS}"
-
-proton run /opt/arkserver/ShooterGame/Binaries/Win64/ArkAscendedServer.exe ${cmd} ${ark_flags}
-
-#capture logs
-tail -c0 -F /opt/arkserver/ShooterGame/Saved/Logs/ShooterGame.log
+#starting server and outputting log file
+proton run /opt/arkserver/ShooterGame/Binaries/Win64/ArkAscendedServer.exe ${cmd} ${ark_flags} > /dev/null 2>&1 &
+tail -f "/opt/arkserver/ShooterGame/Saved/Logs/ShooterGame.log"
