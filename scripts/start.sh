@@ -1,3 +1,16 @@
+#!/bin/bash
+set -ex
+
+# Create steam directory and set variables
+mkdir -p /home/arkuser/.steam/steam/steamapps/compatdata/${ASA_APPID}
+
+# Install ASA server
+/opt/steamcmd/steamcmd.sh +force_install_dir /opt/arkserver +login anonymous +app_update ${ASA_APPID} validate +quit
+
+# Show server logs
+mkdir -p /opt/arkserver/ShooterGame/Saved/Logs && touch /opt/arkserver/ShooterGame/Saved/Logs/ShooterGame.log
+tail -c0 -F /opt/arkserver/ShooterGame/Saved/Logs/ShooterGame.log
+
 export STEAM_COMPAT_CLIENT_INSTALL_PATH="/home/arkuser/.steam/steam"
 export STEAM_COMPAT_DATA_PATH="/home/arkuser/.steam/steam/steamapps/compatdata/${ASA_APPID}"
 
@@ -36,4 +49,3 @@ fi
 ark_flags="${ark_flags} ${ARK_EXTRA_DASH_OPTS}"
 
 proton run /opt/arkserver/ShooterGame/Binaries/Win64/ArkAscendedServer.exe ${cmd} ${ark_flags}
-tail -c0 -F /opt/arkserver/ShooterGame/Saved/Logs/ShooterGame.log
