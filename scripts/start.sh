@@ -36,6 +36,11 @@ fi
 cmd="${cmd}${ARK_EXTRA_OPTS}"
 
 # Server dash options
+# Install mods
+if [ -n "$MODS" ]; then
+    ark_flags="${ark_flags} -mods=${MODS}"
+fi
+
 ark_flags="-log"
 if [ -n ${DISABLE_BATTLEYE} ]; then 
     ark_flags="${ark_flags} -NoBattlEye"
@@ -45,11 +50,6 @@ fi
 
 if [ -n ${MAX_PLAYERS} ]; then 
     ark_flags="${ark_flags} -WinLiveMaxPlayers=${MAX_PLAYERS}"
-fi
-
-# Install mods
-if [ -n "$MODS" ]; then
-    ark_flags="${ark_flags} -mods=${MODS}"
 fi
 
 ark_flags="${ark_flags} ${ARK_EXTRA_DASH_OPTS}"
