@@ -4,6 +4,7 @@ services:
   asa_server:
     tty: true
     container_name: asa_server
+    restart: unless-stopped
     build:
       context: .
     env_file:
