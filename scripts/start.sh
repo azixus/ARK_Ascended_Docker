@@ -41,7 +41,8 @@ if [ -n "$MODS" ]; then
     ark_flags="${ark_flags} -mods=${MODS}"
 fi
 
-ark_flags="-log"
+ark_flags="${ark_flags} -log"
+
 if [ -n ${DISABLE_BATTLEYE} ]; then 
     ark_flags="${ark_flags} -NoBattlEye"
 else 
