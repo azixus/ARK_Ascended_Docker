@@ -36,3 +36,4 @@ fi
 ark_flags="${ark_flags} ${ARK_EXTRA_DASH_OPTS}"
 
 proton run /opt/arkserver/ShooterGame/Binaries/Win64/ArkAscendedServer.exe ${cmd} ${ark_flags}
+tail -c0 -F /opt/arkserver/ShooterGame/Saved/Logs/ShooterGame.log
