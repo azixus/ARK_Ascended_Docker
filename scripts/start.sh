@@ -49,7 +49,7 @@ fi
 
 # Install mods
 if [ -n "$MODS" ]; then
-    ark_flags="${ark_flags} -automanagedmods -mods=${MODS}"
+    ark_flags="${ark_flags} -mods=${MODS}"
 fi
 
 ark_flags="${ark_flags} ${ARK_EXTRA_DASH_OPTS}"
