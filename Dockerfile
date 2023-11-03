@@ -71,4 +71,4 @@ COPY --chown=arkuser --chmod=755 ./scripts/manager.sh /usr/local/bin/manager
 COPY --chown=arkuser --chmod=755 ./scripts/start.sh /opt/arkserver/start.sh
 
 CMD        ["/bin/bash", "/entrypoint.sh"]
-ENTRYPOINT [ "/bin/bash", "/start.sh" ]
+ENTRYPOINT [ "/bin/bash", "manager start"]
