@@ -10,7 +10,7 @@ services:
       - .env
     volumes:
       - shooter_game:/opt/arkserver
-      - steam:/home/arkuser/.steam
+      - steam_data:/opt/steamcmd
     ports:
       # Port for connections from ARK game client
       - "${SERVER_PORT}:${SERVER_PORT}/udp"
@@ -24,4 +24,4 @@ services:
 
 volumes:
     shooter_game:
-    steam:
+    steam_data:
