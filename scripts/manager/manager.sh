@@ -4,18 +4,34 @@ LOG_FILE=/opt/arkserver/ShooterGame/Saved/Logs/ShooterGame.log
 PID_FILE=/opt/arkserver/.server.pid
 SHUTDOWN_TIMEOUT=30
 
-status() {
+get_and_check_pid() {
     # Get PID
     ark_pid=$(cat "$PID_FILE" 2>/dev/null)
-    if [[ -z $ark_pid ]]; then
-        echo "Server PID not found (server offline?)"
+    if [[ -z "$ark_pid" ]]; then
+        echo "0"
         return
     fi
+
+    # Check process is still alive
+    if ps -p $ark_pid > /dev/null; then
+        echo "$ark_pid"
+    else
+        echo "0"
+    fi
+}
+
+status() {
+    # Get server PID
+    ark_pid=$(get_and_check_pid)
+    if [[ "$ark_pid" == 0 ]]; then
+        echo "Server PID not found (server offline?)"
+        return
+    fi    
 
     echo "Server PID $ark_pid"
 
     ark_port=$(ss -tupln | grep "GameThread" | grep -oP '(?<=:)\d+')
-    if [[ -z $ark_port ]]; then
+    if [[ -z "$ark_port" ]]; then
         echo "Server not listening"
         return
     fi
@@ -39,17 +55,17 @@ status() {
 
 start() {
     # Check server not already running
-    ark_pid=$(cat "$PID_FILE" 2>/dev/null)
-    if [[ -n $ark_pid ]]; then
-        echo "Server is already running"
+    ark_pid=$(get_and_check_pid)
+    if [[ "$ark_pid" != 0 ]]; then
+        echo "Server is already running."
         return
-    fi
+    fi    
 
     echo "Starting server on port ${SERVER_PORT}"
     echo "-------- STARTING SERVER --------" >> $LOG_FILE
 
     # Start server in the background + nohup and save PID
-    nohup bash /opt/arkserver/start.sh >/dev/null 2>&1 &
+    nohup /opt/manager/manager_server_start.sh >/dev/null 2>&1 &
     ark_pid=$!
     echo "$ark_pid" > $PID_FILE
     sleep 3
@@ -58,11 +74,12 @@ start() {
 }
 
 stop() {
-    ark_pid=$(cat "$PID_FILE" 2>/dev/null)
-    if [[ -z $ark_pid ]]; then
+    # Get server pid
+    ark_pid=$(get_and_check_pid)
+    if [[ "$ark_pid" == 0 ]]; then
         echo "Server PID not found (server offline?)"
         return
-    fi
+    fi    
 
     if [[ $1 == "--saveworld" ]]; then
         saveworld
@@ -112,6 +129,13 @@ restart() {
 }
 
 saveworld() {
+    # Get server pid
+    ark_pid=$(get_and_check_pid)
+    if [[ "$ark_pid" == 0 ]]; then
+        echo "Server PID not found (server offline?)"
+        return
+    fi    
+
     echo "Saving world..."
     out=$(${RCON_CMDLINE[@]} SaveWorld 2>/dev/null)
     res=$?
@@ -123,6 +147,13 @@ saveworld() {
 }
 
 custom_rcon() {
+    # Get server pid
+    ark_pid=$(get_and_check_pid)
+    if [[ "$ark_pid" == 0 ]]; then
+        echo "Server PID not found (server offline?)"
+        return
+    fi    
+
     out=$(${RCON_CMDLINE[@]} "${@}" 2>/dev/null)
     echo "$out"
 }
