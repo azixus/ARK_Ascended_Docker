@@ -23,7 +23,7 @@
 
 FROM        debian:bullseye-slim
 
-RUN         useradd -d /home/arkuser -m arkuser
+RUN         useradd -d /home/arkuser -u $PUID -g $PGID -m arkuser
 RUN         mkdir /opt/arkserver
 
 RUN         set -ex; \
