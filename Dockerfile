@@ -67,7 +67,7 @@ USER        arkuser
 WORKDIR     /opt/arkserver/
 
 COPY --chown=arkuser --chmod=755 ./scripts/manager.sh /usr/local/bin/manager
-COPY --chown=arkuser --chmod=755 ./scripts/start.sh /opt/arkserver/start.sh
+COPY --chown=arkuser --chmod=755 ./scripts/start.sh /opt/start.sh
 
 #on startup enter start.sh script
-ENTRYPOINT ./start.sh
+ENTRYPOINT /opt/start.sh

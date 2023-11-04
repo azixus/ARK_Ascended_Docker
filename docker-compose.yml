@@ -10,7 +10,7 @@ services:
     env_file:
       - .env
     volumes:
-      - shooter_game:/opt/arkserver
+      - ./ark_data:/opt/arkserver
       - steam_data:/opt/steamcmd
     ports:
       # Port for connections from ARK game client
@@ -26,5 +26,4 @@ services:
     memswap_limit: 16g
 
 volumes:
-    shooter_game:
     steam_data:
