@@ -25,8 +25,6 @@ $ docker compose up --build -d
 During the startup of the container, the ASA server is automatically downloaded with `steamcmd` and subsequently started. You can monitor the progress with the following command:
 ```bash
 $ docker compose logs -f
-Expected output:
-```
 asa_server  |[2023.10.31-17.06.19:714][  0]Log file open, 10/31/23 17:06:19
 asa_server  |[2023.10.31-17.06.19:715][  0]LogMemory: Platform Memory Stats for WindowsServer
 asa_server  |[2023.10.31-17.06.19:715][  0]LogMemory: Process Physical Memory: 319.32 MB used, 323.19 MB peak
