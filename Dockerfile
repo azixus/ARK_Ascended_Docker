@@ -23,7 +23,11 @@
 
 FROM        debian:bullseye-slim
 
-RUN         useradd -d /home/arkuser -u $PUID -g $PGID -m arkuser
+# Arguments defining arkuser's uid and gid
+ARG         PUID
+ARG         PGID
+
+RUN         groupadd -g $PGID arkuser && useradd -d /home/arkuser -u $PUID -g $PGID -m arkuser
 RUN         mkdir /opt/arkserver
 
 RUN         set -ex; \
