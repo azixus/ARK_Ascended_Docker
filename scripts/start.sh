@@ -60,6 +60,10 @@ if [ -n ${MAX_PLAYERS} ]; then
 fi
 
 ark_flags="${ark_flags} ${ARK_EXTRA_DASH_OPTS}"
+
+# Setup custom signal handlers for container exit
+trap "manager stop --saveworld" SIGTERM
+
 #starting server and outputting log file
 proton run /opt/arkserver/ShooterGame/Binaries/Win64/ArkAscendedServer.exe ${cmd} ${ark_flags} > /dev/null 2>&1 &
 tail -f "/opt/arkserver/ShooterGame/Saved/Logs/ShooterGame.log"

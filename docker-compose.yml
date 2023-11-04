@@ -19,10 +19,13 @@ services:
       #- "${RCON_PORT}:${RCON_PORT}/tcp"
     networks:
       - default
+    # Increase default grace period to ensure clean shutdown
+    stop_grace_period: 45s
     deploy:
       resources:
         limits:
           memory: 16g
+    # Comment to enable swap
     memswap_limit: 16g
 
 volumes:
