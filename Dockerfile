@@ -64,10 +64,10 @@ RUN         set -ex; \
             chown -R arkuser:arkuser /opt/steamcmd
 
 USER        arkuser
-WORKDIR     /home/arkuser
+WORKDIR     /opt/arkserver/
 
-COPY --chown=arkuser --chmod=755 ./scripts/entrypoint.sh /entrypoint.sh
 COPY --chown=arkuser --chmod=755 ./scripts/manager.sh /usr/local/bin/manager
-COPY --chown=arkuser --chmod=755 ./scripts/start.sh /opt/arkserver/start.sh
+COPY --chown=arkuser --chmod=755 ./scripts/start.sh /opt/start.sh
 
-CMD         ["/bin/bash", "/entrypoint.sh"]
+#on startup enter start.sh script
+ENTRYPOINT /opt/start.sh

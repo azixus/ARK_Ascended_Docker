@@ -4,16 +4,19 @@ services:
   asa_server:
     tty: true
     container_name: asa_server
+    restart: unless-stopped
     build:
       context: .
     env_file:
       - .env
     volumes:
-      - ./ShooterGame:/opt/arkserver/ShooterGame
-      - /opt/steamcmd
+      - ./ark_data:/opt/arkserver
+      - steam_data:/opt/steamcmd
     ports:
       # Port for connections from ARK game client
       - "${SERVER_PORT}:${SERVER_PORT}/udp"
+      #uncomment if you want to expose the RCON Port
+      #- "${RCON_PORT}:${RCON_PORT}/tcp"
     networks:
       - default
     deploy:
@@ -21,3 +24,6 @@ services:
         limits:
           memory: 16g
     memswap_limit: 16g
+
+volumes:
+    steam_data:
