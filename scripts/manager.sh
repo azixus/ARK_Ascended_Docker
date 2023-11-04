@@ -1,11 +1,12 @@
 #!/bin/bash
-RCON_CMDLINE="rcon -a 127.0.0.1:${RCON_PORT} -p ${ARK_ADMIN_PASSWORD}"
+RCON_CMDLINE=( rcon -a 127.0.0.1:${RCON_PORT} -p ${ARK_ADMIN_PASSWORD} )
 LOG_FILE=/opt/arkserver/ShooterGame/Saved/Logs/ShooterGame.log
+PID_FILE=/opt/arkserver/.server.pid
 SHUTDOWN_TIMEOUT=30
 
 status() {
     # Get PID
-    ark_pid=$(pgrep -f ".*proton.*ArkAscendedServer.exe")
+    ark_pid=$(cat "$PID_FILE" 2>/dev/null)
     if [[ -z $ark_pid ]]; then
         echo "Server PID not found (server offline?)"
         return
@@ -22,7 +23,7 @@ status() {
     echo "Server listening on port $ark_port"
     
     # Check number of players
-    out=$(${RCON_CMDLINE} ListPlayers 2>/dev/null)
+    out=$(${RCON_CMDLINE[@]} ListPlayers 2>/dev/null)
     res=$?
     if [[ $res == 0 ]]; then
         echo "Server is up"
@@ -37,17 +38,27 @@ status() {
 }
 
 start() {
+    # Check server not already running
+    ark_pid=$(cat "$PID_FILE" 2>/dev/null)
+    if [[ -n $ark_pid ]]; then
+        echo "Server is already running"
+        return
+    fi
+
     echo "Starting server on port ${SERVER_PORT}"
     echo "-------- STARTING SERVER --------" >> $LOG_FILE
 
+    # Start server in the background + nohup and save PID
     nohup bash /opt/arkserver/start.sh >/dev/null 2>&1 &
+    ark_pid=$!
+    echo "$ark_pid" > $PID_FILE
     sleep 3
 
     echo "Server should be up in a few minutes"
 }
 
 stop() {
-    ark_pid=$(pgrep -f ".*proton.*ArkAscendedServer.exe")
+    ark_pid=$(cat "$PID_FILE" 2>/dev/null)
     if [[ -z $ark_pid ]]; then
         echo "Server PID not found (server offline?)"
         return
@@ -60,7 +71,8 @@ stop() {
     echo "Stopping server gracefully..."
     echo "-------- STOPPING SERVER --------" >> $LOG_FILE
 
-    out=$(${RCON_CMDLINE} DoExit 2>/dev/null)
+    # Check number of players
+    out=$(${RCON_CMDLINE[@]} DoExit 2>/dev/null)
     res=$?
     force=false
     if [[ $res == 0  && "$out" == "Exiting..." ]]; then
@@ -89,6 +101,7 @@ stop() {
         fi
     fi
 
+    echo "" > $PID_FILE
     echo "Done"
     echo "-------- SERVER STOPPED --------" >> $LOG_FILE
 }
@@ -100,7 +113,7 @@ restart() {
 
 saveworld() {
     echo "Saving world..."
-    out=$(${RCON_CMDLINE} SaveWorld 2>/dev/null)
+    out=$(${RCON_CMDLINE[@]} SaveWorld 2>/dev/null)
     res=$?
     if [[ $res == 0 && "$out" == "World Saved" ]]; then
         echo "Success!"
@@ -110,7 +123,7 @@ saveworld() {
 }
 
 custom_rcon() {
-    out=$(${RCON_CMDLINE} "${@}" 2>/dev/null)
+    out=$(${RCON_CMDLINE[@]} "${@}" 2>/dev/null)
     echo "$out"
 }
 
@@ -118,7 +131,7 @@ update() {
     echo "Updating ARK Ascended Server"
     
     stop --saveworld
-    /opt/steamcmd/steamcmd.sh +force_install_dir /opt/arkserver +login anonymous +app_update 2430930 validate +quit
+    /opt/steamcmd/steamcmd.sh +force_install_dir /opt/arkserver +login anonymous +app_update ${ASA_APPID} +quit
 
     echo "Update completed"
     start
