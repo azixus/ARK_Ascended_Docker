@@ -9,6 +9,12 @@ mkdir -p /home/arkuser/.steam/steam/steamapps/compatdata/${ASA_APPID}
 # Install or update ASA server + verify installation
 /opt/steamcmd/steamcmd.sh +force_install_dir /opt/arkserver +login anonymous +app_update ${ASA_APPID} validate +quit
 
+# Remove unnecessary files (saves 6.4GB.., that will be re-downloaded next update)
+if [ -n ${REDUCE_IMAGE_SIZE} ]; then 
+    rm -rf /opt/arkserver/ShooterGame/Binaries/Win64/ArkAscendedServer.pdb
+    rm -rf /opt/arkserver/ShooterGame/Content/Movies/
+fi
+
 #Create file for showing server logs
 mkdir -p /opt/arkserver/ShooterGame/Saved/Logs && touch /opt/arkserver/ShooterGame/Saved/Logs/ShooterGame.log
 
@@ -54,6 +60,10 @@ if [ -n ${MAX_PLAYERS} ]; then
 fi
 
 ark_flags="${ark_flags} ${ARK_EXTRA_DASH_OPTS}"
+
+# Setup custom signal handlers for container exit
+trap "manager stop --saveworld" SIGTERM
+
 #starting server and outputting log file
 proton run /opt/arkserver/ShooterGame/Binaries/Win64/ArkAscendedServer.exe ${cmd} ${ark_flags} > /dev/null 2>&1 &
 tail -f "/opt/arkserver/ShooterGame/Saved/Logs/ShooterGame.log"
