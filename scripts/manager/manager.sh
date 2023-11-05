@@ -163,6 +163,11 @@ update() {
     
     stop --saveworld
     /opt/steamcmd/steamcmd.sh +force_install_dir /opt/arkserver +login anonymous +app_update ${ASA_APPID} +quit
+    # Remove unnecessary files (saves 6.4GB.., that will be re-downloaded next update)
+    if [[ -n "${REDUCE_IMAGE_SIZE}" ]]; then 
+        rm -rf /opt/arkserver/ShooterGame/Binaries/Win64/ArkAscendedServer.pdb
+        rm -rf /opt/arkserver/ShooterGame/Content/Movies/
+    fi
 
     echo "Update completed"
     start
