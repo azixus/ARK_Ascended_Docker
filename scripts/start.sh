@@ -3,8 +3,8 @@
 #exit on error
 set -ex
 
-# Create steam directory and set variables
-mkdir -p /home/arkuser/.steam/steam/steamapps/compatdata/${ASA_APPID}
+# Create steam directory and set environment variables
+mkdir -p "${STEAM_COMPAT_DATA_PATH}"
 
 # Install or update ASA server + verify installation
 /opt/steamcmd/steamcmd.sh +force_install_dir /opt/arkserver +login anonymous +app_update ${ASA_APPID} validate +quit
@@ -16,9 +16,17 @@ if [[ -n "${REDUCE_IMAGE_SIZE}" ]]; then
 fi
 
 #Create file for showing server logs
-mkdir -p /opt/arkserver/ShooterGame/Saved/Logs && echo "" > /opt/arkserver/ShooterGame/Saved/Logs/ShooterGame.log
+mkdir -p "${LOG_FILE%/*}" && echo "" > "${LOG_FILE}"
 
 # Start server through manager
+echo "" > "${PID_FILE}"
 manager start &
 
-tail -f "/opt/arkserver/ShooterGame/Saved/Logs/ShooterGame.log"
+# Register SIGTERM handler to stop server gracefully
+trap "manager stop --saveworld" SIGTERM
+
+# Start tail process in the background, then wait for tail to finish.
+# This is just a hack to catch SIGTERM signals, tail does not forward
+# the signals.
+tail -f "${LOG_FILE}" &
+wait $!

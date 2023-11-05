@@ -1,8 +1,5 @@
 #!/bin/bash
-
 # This file is called by manager.sh to start a new instance of ASA
-export STEAM_COMPAT_CLIENT_INSTALL_PATH="/home/arkuser/.steam/steam"
-export STEAM_COMPAT_DATA_PATH="/home/arkuser/.steam/steam/steamapps/compatdata/${ASA_APPID}"
 
 # Server main options
 cmd="${SERVER_MAP}?listen?SessionName=\"${SESSION_NAME}\"?Port=${SERVER_PORT}"

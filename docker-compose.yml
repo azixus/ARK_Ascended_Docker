@@ -10,6 +10,7 @@ services:
       args:
         PUID: ${PUID}
         PGID: ${PGID}
+        TINI_VERSION: ${TINI_VERSION}
     env_file:
       - .env
     volumes:

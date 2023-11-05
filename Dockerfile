@@ -54,12 +54,17 @@ RUN         set -ex; \
             rm /var/lib/dbus/machine-id; \
             dbus-uuidgen --ensure
 
-## install rcon
+# Install rcon
 RUN         set -ex; \
             cd /tmp/; \
             curl -sSL https://github.com/gorcon/rcon-cli/releases/download/v0.10.3/rcon-0.10.3-amd64_linux.tar.gz > rcon.tar.gz; \
             tar xvf rcon.tar.gz; \
             mv rcon-0.10.3-amd64_linux/rcon /usr/local/bin/
+
+# Install tini
+ARG         TINI_VERSION
+ADD         https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
+RUN         chmod +x /tini
 
 # Set permissions
 RUN         set -ex; \
@@ -75,4 +80,4 @@ USER        arkuser
 WORKDIR     /opt/arkserver/
 
 #on startup enter start.sh script
-ENTRYPOINT /opt/start.sh
+ENTRYPOINT ["/tini", "--", "/opt/start.sh"]

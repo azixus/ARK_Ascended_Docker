@@ -1,8 +1,5 @@
 #!/bin/bash
 RCON_CMDLINE=( rcon -a 127.0.0.1:${RCON_PORT} -p ${ARK_ADMIN_PASSWORD} )
-LOG_FILE=/opt/arkserver/ShooterGame/Saved/Logs/ShooterGame.log
-PID_FILE=/opt/arkserver/.server.pid
-SHUTDOWN_TIMEOUT=30
 
 get_and_check_pid() {
     # Get PID
@@ -93,13 +90,13 @@ stop() {
     res=$?
     force=false
     if [[ $res == 0  && "$out" == "Exiting..." ]]; then
-        echo "Waiting ${SHUTDOWN_TIMEOUT}s for the server to stop"
-        timeout $SHUTDOWN_TIMEOUT tail --pid=$ark_pid -f /dev/null
+        echo "Waiting ${SERVER_SHUTDOWN_TIMEOUT}s for the server to stop"
+        timeout $SERVER_SHUTDOWN_TIMEOUT tail --pid=$ark_pid -f /dev/null
         res=$?
 
         # Timeout occurred
         if [[ "$res" == 124 ]]; then
-            echo "Server still running after $SHUTDOWN_TIMEOUT seconds"
+            echo "Server still running after $SERVER_SHUTDOWN_TIMEOUT seconds"
             force=true
         fi
     else
@@ -110,7 +107,7 @@ stop() {
         echo "Forcing server shutdown"
         kill -INT $ark_pid
 
-        timeout $SHUTDOWN_TIMEOUT tail --pid=$ark_pid -f /dev/null
+        timeout $SERVER_SHUTDOWN_TIMEOUT tail --pid=$ark_pid -f /dev/null
         res=$?
         # Timeout occurred
         if [[ "$res" == 124 ]]; then
