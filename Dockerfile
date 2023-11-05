@@ -23,14 +23,17 @@
 
 FROM        debian:bullseye-slim
 
-RUN         useradd -d /home/arkuser -m arkuser
+# Arguments defining arkuser's uid and gid
+ARG         PUID
+ARG         PGID
+
+RUN         groupadd -g $PGID arkuser && useradd -d /home/arkuser -u $PUID -g $PGID -m arkuser
 RUN         mkdir /opt/arkserver
 
 RUN         set -ex; \
             dpkg --add-architecture i386; \
             apt update; \
-            apt install -y --no-install-recommends wget iproute2 gnupg2 software-properties-common libntlm0 winbind xvfb xauth libncurses5-dev:i386 libncurses6 dbus libgdiplus lib32gcc-s1; \
-            apt install -y alsa-tools libpulse0 pulseaudio libpulse-dev libasound2 libao-common gnutls-bin gnupg locales numactl cabextract curl python3 python3-pip python3-setuptools sudo procps
+            apt install -y --no-install-recommends wget curl sudo iproute2 procps software-properties-common dbus lib32gcc-s1
 
 # Download steamcmd
 RUN         set -ex; \
@@ -51,23 +54,30 @@ RUN         set -ex; \
             rm /var/lib/dbus/machine-id; \
             dbus-uuidgen --ensure
 
-## install rcon
+# Install rcon
 RUN         set -ex; \
             cd /tmp/; \
             curl -sSL https://github.com/gorcon/rcon-cli/releases/download/v0.10.3/rcon-0.10.3-amd64_linux.tar.gz > rcon.tar.gz; \
             tar xvf rcon.tar.gz; \
             mv rcon-0.10.3-amd64_linux/rcon /usr/local/bin/
 
+# Install tini
+ARG         TINI_VERSION
+ADD         https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
+RUN         chmod +x /tini
+
 # Set permissions
 RUN         set -ex; \
             chown -R arkuser:arkuser /opt/arkserver; \
             chown -R arkuser:arkuser /opt/steamcmd
 
+COPY --chown=arkuser --chmod=755 ./scripts/start.sh /opt/start.sh
+COPY --chown=arkuser --chmod=755 ./scripts/manager /opt/manager
+
+RUN         ln -s /opt/manager/manager.sh /usr/local/bin/manager
+
 USER        arkuser
 WORKDIR     /opt/arkserver/
 
-COPY --chown=arkuser --chmod=755 ./scripts/manager.sh /usr/local/bin/manager
-COPY --chown=arkuser --chmod=755 ./scripts/start.sh /opt/start.sh
-
 #on startup enter start.sh script
-ENTRYPOINT /opt/start.sh
+ENTRYPOINT ["/tini", "--", "/opt/start.sh"]

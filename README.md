@@ -45,14 +45,14 @@ The manager script supports several commands that we highlight below.
 
 **Server start**
 ```bash
-$ docker compose exec -it asa_server manager start
+$ ./manager.sh start
 Starting server on port 7790
 Server should be up in a few minutes
 ```
 
 **Server stop**
 ```bash
-$ docker compose exec asa_server manager stop
+$ ./manager.sh stop
 Stopping server gracefully...
 Waiting 30s for the server to stop
 Done
@@ -60,7 +60,7 @@ Done
 
 **Server restart**
 ```bash
-$ docker compose exec asa_server manager restart
+$ ./manager.sh restart
 Stopping server gracefully...
 Waiting 30s for the server to stop
 Done
@@ -70,7 +70,7 @@ Server should be up in a few minutes
 
 **Server status**
 ```bash
-$ docker compose exec asa_server manager status
+$ ./manager.sh status
 Server PID 124
 Server listening on port 7790
 Server is up
@@ -79,14 +79,14 @@ Server is up
 
 **Saving the world**
 ```bash
-$ docker compose exec asa_server manager saveworld
+$ ./manager.sh saveworld
 Saving world...
 Success!
 ```
 
 **Server update**
 ```bash
-$ docker compose exec asa_server manager update
+$ ./manager.sh update
 Updating ARK Ascended Server
 Saving world...
 Success!
@@ -103,9 +103,8 @@ Starting server on port 7790
 Server should be up in a few minutes
 ```
 
-
 **RCON commands**
 ```bash
-$ docker compose exec -it asa_server manager rcon "Broadcast Hello World"   
+$ ./manager.sh rcon "Broadcast Hello World"   
 Server received, But no response!!
 ```
