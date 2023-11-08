@@ -170,6 +170,14 @@ update() {
     start
 }
 
+backup(){
+    echo "Creating backup. Backups are saved in your ark_backup folder"
+    
+    nohup /opt/manager/manager_backup.sh
+
+
+}
+
 # Main function
 main() {
     action="$1"
@@ -197,8 +205,11 @@ main() {
         "update") 
             update
             ;;
+        "backup")
+            backup
+            ;;
         *)
-            echo "Invalid action. Supported actions: status, start, stop, restart, saveworld, rcon, update."
+            echo "Invalid action. Supported actions: status, start, stop, restart, saveworld, rcon, update, backup."
             exit 1
             ;;
     esac
