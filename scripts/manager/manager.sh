@@ -171,7 +171,7 @@ update() {
 }
 
 backup(){
-    echo "Creating backup. Backups are saved in your ark_backup folder"
+    echo "Creating backup. Backups are saved in your ./ark_backup volume."
     # saving before creating the backup
     saveworld
     # sleep is nessecary because the server seems to write save files after the saveworld function ends and thus tar runs into errors.

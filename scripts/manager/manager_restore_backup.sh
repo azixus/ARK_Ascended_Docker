@@ -9,7 +9,7 @@ for datei in $(ls $path); do
    i=$((i + 1))
 done
 
-echo "Pleas input the number of the archive you want to restore."
+echo "Please input the number of the archive you want to restore."
 read num
 
 if [[ ! $num =~ ^[0-9]+$ ]] || [[ $num -ge $i ]]; then
@@ -25,7 +25,7 @@ tar -xzf $path/$archive -C /opt/arkserver/ShooterGame/
 res=$?
 
 if [[ $res == 0 ]]; then
-    echo "backup restored successfully!"
+    echo "Backup restored successfully!"
 else
     echo "An Error occured. Restoring failed."
 fi
