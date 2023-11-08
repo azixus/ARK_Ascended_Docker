@@ -1,13 +1,11 @@
 #!/bin/bash
-
-set -ex
-
+set -e
 i=1
 echo "Here is a list of all your backup files: "
 
 # list all files with a counter
 for datei in $(ls /var/backups/asa-server); do
-   echo "$i - - - - - Datei: $datei"
+   echo "$i - - - - - File: $datei"
    i=$((i + 1))
 done
 

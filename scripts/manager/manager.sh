@@ -188,14 +188,18 @@ backup(){
 }
 
 restoreBackup(){
-    echo "Stopping the server."
-    stop
-    sleep 5
-    # restoring the backup
-    /opt/manager/manager_restore_backup.sh
-    
-    sleep 5
-    start
+    if [[$(ls /var/backups/asa-server/ | wc -l) > 0 ]]; then
+        echo "Stopping the server."
+        stop
+        sleep 5
+        # restoring the backup
+        /opt/manager/manager_restore_backup.sh
+        
+        sleep 5
+        start
+    else
+        echo "You haven't created any backups yet."
+    fi
 }
 
 

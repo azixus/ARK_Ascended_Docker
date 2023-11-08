@@ -1,5 +1,5 @@
 #!/bin/bash
-set -ex
+set -e
 # create backup folder if it not already exists
 mkdir -p /var/backups/asa-server
 
