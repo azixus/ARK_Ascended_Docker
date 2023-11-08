@@ -1,20 +1,34 @@
 #!/bin/bash
-RCON_CMDLINE="rcon -a 127.0.0.1:${RCON_PORT} -p ${ARK_ADMIN_PASSWORD}"
-LOG_FILE=/opt/arkserver/ShooterGame/Saved/Logs/ShooterGame.log
-SHUTDOWN_TIMEOUT=30
+RCON_CMDLINE=( rcon -a 127.0.0.1:${RCON_PORT} -p ${ARK_ADMIN_PASSWORD} )
 
-status() {
+get_and_check_pid() {
     # Get PID
-    ark_pid=$(pgrep -f ".*proton.*ArkAscendedServer.exe")
-    if [[ -z $ark_pid ]]; then
-        echo "Server PID not found (server offline?)"
+    ark_pid=$(cat "$PID_FILE" 2>/dev/null)
+    if [[ -z "$ark_pid" ]]; then
+        echo "0"
         return
     fi
+
+    # Check process is still alive
+    if ps -p $ark_pid > /dev/null; then
+        echo "$ark_pid"
+    else
+        echo "0"
+    fi
+}
+
+status() {
+    # Get server PID
+    ark_pid=$(get_and_check_pid)
+    if [[ "$ark_pid" == 0 ]]; then
+        echo "Server PID not found (server offline?)"
+        return
+    fi    
 
     echo "Server PID $ark_pid"
 
     ark_port=$(ss -tupln | grep "GameThread" | grep -oP '(?<=:)\d+')
-    if [[ -z $ark_port ]]; then
+    if [[ -z "$ark_port" ]]; then
         echo "Server not listening"
         return
     fi
@@ -22,13 +36,13 @@ status() {
     echo "Server listening on port $ark_port"
     
     # Check number of players
-    out=$(${RCON_CMDLINE} ListPlayers 2>/dev/null)
+    out=$(${RCON_CMDLINE[@]} ListPlayers 2>/dev/null)
     res=$?
     if [[ $res == 0 ]]; then
         echo "Server is up"
         num_players=0
         if [[ "$out" != "No Players"* ]]; then
-            num_players=$(echo -n "$out" | wc -l)
+            num_players=$(echo "$out" | wc -l)
         fi
         echo "$num_players players connected"
     else
@@ -37,21 +51,32 @@ status() {
 }
 
 start() {
+    # Check server not already running
+    ark_pid=$(get_and_check_pid)
+    if [[ "$ark_pid" != 0 ]]; then
+        echo "Server is already running."
+        return
+    fi    
+
     echo "Starting server on port ${SERVER_PORT}"
     echo "-------- STARTING SERVER --------" >> $LOG_FILE
 
-    nohup bash /opt/arkserver/start.sh >/dev/null 2>&1 &
+    # Start server in the background + nohup and save PID
+    nohup /opt/manager/manager_server_start.sh >/dev/null 2>&1 &
+    ark_pid=$!
+    echo "$ark_pid" > $PID_FILE
     sleep 3
 
     echo "Server should be up in a few minutes"
 }
 
 stop() {
-    ark_pid=$(pgrep -f ".*proton.*ArkAscendedServer.exe")
-    if [[ -z $ark_pid ]]; then
+    # Get server pid
+    ark_pid=$(get_and_check_pid)
+    if [[ "$ark_pid" == 0 ]]; then
         echo "Server PID not found (server offline?)"
         return
-    fi
+    fi    
 
     if [[ $1 == "--saveworld" ]]; then
         saveworld
@@ -61,17 +86,17 @@ stop() {
     echo "-------- STOPPING SERVER --------" >> $LOG_FILE
 
     # Check number of players
-    out=$(${RCON_CMDLINE} DoExit 2>/dev/null)
+    out=$(${RCON_CMDLINE[@]} DoExit 2>/dev/null)
     res=$?
     force=false
     if [[ $res == 0  && "$out" == "Exiting..." ]]; then
-        echo "Waiting ${SHUTDOWN_TIMEOUT}s for the server to stop"
-        timeout $SHUTDOWN_TIMEOUT tail --pid=$ark_pid -f /dev/null
+        echo "Waiting ${SERVER_SHUTDOWN_TIMEOUT}s for the server to stop"
+        timeout $SERVER_SHUTDOWN_TIMEOUT tail --pid=$ark_pid -f /dev/null
         res=$?
 
         # Timeout occurred
         if [[ "$res" == 124 ]]; then
-            echo "Server still running after $SHUTDOWN_TIMEOUT seconds"
+            echo "Server still running after $SERVER_SHUTDOWN_TIMEOUT seconds"
             force=true
         fi
     else
@@ -82,7 +107,7 @@ stop() {
         echo "Forcing server shutdown"
         kill -INT $ark_pid
 
-        timeout $SHUTDOWN_TIMEOUT tail --pid=$ark_pid -f /dev/null
+        timeout $SERVER_SHUTDOWN_TIMEOUT tail --pid=$ark_pid -f /dev/null
         res=$?
         # Timeout occurred
         if [[ "$res" == 124 ]]; then
@@ -90,6 +115,7 @@ stop() {
         fi
     fi
 
+    echo "" > $PID_FILE
     echo "Done"
     echo "-------- SERVER STOPPED --------" >> $LOG_FILE
 }
@@ -100,8 +126,15 @@ restart() {
 }
 
 saveworld() {
+    # Get server pid
+    ark_pid=$(get_and_check_pid)
+    if [[ "$ark_pid" == 0 ]]; then
+        echo "Server PID not found (server offline?)"
+        return
+    fi    
+
     echo "Saving world..."
-    out=$(${RCON_CMDLINE} SaveWorld 2>/dev/null)
+    out=$(${RCON_CMDLINE[@]} SaveWorld 2>/dev/null)
     res=$?
     if [[ $res == 0 && "$out" == "World Saved" ]]; then
         echo "Success!"
@@ -111,7 +144,14 @@ saveworld() {
 }
 
 custom_rcon() {
-    out=$(${RCON_CMDLINE} "${@}" 2>/dev/null)
+    # Get server pid
+    ark_pid=$(get_and_check_pid)
+    if [[ "$ark_pid" == 0 ]]; then
+        echo "Server PID not found (server offline?)"
+        return
+    fi    
+
+    out=$(${RCON_CMDLINE[@]} "${@}" 2>/dev/null)
     echo "$out"
 }
 
@@ -119,7 +159,12 @@ update() {
     echo "Updating ARK Ascended Server"
     
     stop --saveworld
-    /opt/steamcmd/steamcmd.sh +force_install_dir /opt/arkserver +login anonymous +app_update 2430930 validate +quit
+    /opt/steamcmd/steamcmd.sh +force_install_dir /opt/arkserver +login anonymous +app_update ${ASA_APPID} +quit
+    # Remove unnecessary files (saves 6.4GB.., that will be re-downloaded next update)
+    if [[ -n "${REDUCE_IMAGE_SIZE}" ]]; then 
+        rm -rf /opt/arkserver/ShooterGame/Binaries/Win64/ArkAscendedServer.pdb
+        rm -rf /opt/arkserver/ShooterGame/Content/Movies/
+    fi
 
     echo "Update completed"
     start

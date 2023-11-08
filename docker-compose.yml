@@ -4,20 +4,33 @@ services:
   asa_server:
     tty: true
     container_name: asa_server
+    restart: unless-stopped
     build:
       context: .
+      args:
+        PUID: ${PUID}
+        PGID: ${PGID}
+        TINI_VERSION: ${TINI_VERSION}
     env_file:
       - .env
     volumes:
-      - ./ShooterGame:/opt/arkserver/ShooterGame
-      - /opt/steamcmd
+      - ./ark_data:/opt/arkserver
+      - steam_data:/opt/steamcmd
     ports:
       # Port for connections from ARK game client
       - "${SERVER_PORT}:${SERVER_PORT}/udp"
+      #uncomment if you want to expose the RCON Port
+      #- "${RCON_PORT}:${RCON_PORT}/tcp"
     networks:
       - default
+    # Increase default grace period to ensure clean shutdown
+    stop_grace_period: 45s
     deploy:
       resources:
         limits:
           memory: 16g
+    # Comment to enable swap
     memswap_limit: 16g
+
+volumes:
+    steam_data:

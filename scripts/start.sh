@@ -1,38 +1,32 @@
-export STEAM_COMPAT_CLIENT_INSTALL_PATH="/home/arkuser/.steam/steam"
-export STEAM_COMPAT_DATA_PATH="/home/arkuser/.steam/steam/steamapps/compatdata/${ASA_APPID}"
+#!/bin/bash
 
-# Server main options
-cmd="${SERVER_MAP}?listen?SessionName=\"${SESSION_NAME}\"?Port=${SERVER_PORT}"
-if [ -n ${MAX_PLAYERS} ]; then
-    cmd="${cmd}?MaxPlayers=${MAX_PLAYERS}"
+#exit on error
+set -ex
+
+# Create steam directory and set environment variables
+mkdir -p "${STEAM_COMPAT_DATA_PATH}"
+
+# Install or update ASA server + verify installation
+/opt/steamcmd/steamcmd.sh +force_install_dir /opt/arkserver +login anonymous +app_update ${ASA_APPID} validate +quit
+
+# Remove unnecessary files (saves 6.4GB.., that will be re-downloaded next update)
+if [[ -n "${REDUCE_IMAGE_SIZE}" ]]; then 
+    rm -rf /opt/arkserver/ShooterGame/Binaries/Win64/ArkAscendedServer.pdb
+    rm -rf /opt/arkserver/ShooterGame/Content/Movies/
 fi
 
-if [ -n ${SERVER_PASSWORD} ]; then
-    cmd="${cmd}?ServerPassword=${SERVER_PASSWORD}"
-fi
+#Create file for showing server logs
+mkdir -p "${LOG_FILE%/*}" && echo "" > "${LOG_FILE}"
 
-if [ -n ${ARK_ADMIN_PASSWORD} ]; then
-    cmd="${cmd}?ServerAdminPassword=\"${ARK_ADMIN_PASSWORD}\""
-fi
+# Start server through manager
+echo "" > "${PID_FILE}"
+manager start &
 
-if [ -n ${RCON_PORT} ]; then
-    cmd="${cmd}?RCONEnabled=True?RCONPort=${RCON_PORT}"
-fi
+# Register SIGTERM handler to stop server gracefully
+trap "manager stop --saveworld" SIGTERM
 
-cmd="${cmd}${ARK_EXTRA_OPTS}"
-
-# Server dash options
-ark_flags="-log"
-if [ -n ${DISABLE_BATTLEYE} ]; then 
-    ark_flags="${ark_flags} -NoBattlEye"
-else 
-    ark_flags="${ark_flags} -BattlEye"
-fi
-
-if [ -n ${MAX_PLAYERS} ]; then 
-    ark_flags="${ark_flags} -WinLiveMaxPlayers=${MAX_PLAYERS}"
-fi
-
-ark_flags="${ark_flags} ${ARK_EXTRA_DASH_OPTS}"
-
-proton run /opt/arkserver/ShooterGame/Binaries/Win64/ArkAscendedServer.exe ${cmd} ${ark_flags}
+# Start tail process in the background, then wait for tail to finish.
+# This is just a hack to catch SIGTERM signals, tail does not forward
+# the signals.
+tail -f "${LOG_FILE}" &
+wait $!
