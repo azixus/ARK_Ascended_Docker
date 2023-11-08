@@ -188,7 +188,8 @@ backup(){
 }
 
 restoreBackup(){
-    if [[$(ls /var/backups/asa-server/ | wc -l) > 0 ]]; then
+    backup_count=$(ls /var/backups/asa-server/ | wc -l)
+    if [[ $backup_count > 0 ]]; then
         echo "Stopping the server."
         stop
         sleep 5

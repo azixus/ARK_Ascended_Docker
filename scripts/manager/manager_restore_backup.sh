@@ -1,29 +1,31 @@
 #!/bin/bash
 set -e
 i=1
-echo "Here is a list of all your backup files: "
-
+echo "Here is a list of all your backup archives: "
+path="/var/backups/asa-server"
 # list all files with a counter
-for datei in $(ls /var/backups/asa-server); do
+for datei in $(ls $path); do
    echo "$i - - - - - File: $datei"
    i=$((i + 1))
 done
 
-echo "which file do you want to choose? (select a number from above according to the backup you want to recover)"
+echo "Pleas input the number of the archive you want to restore."
 read num
 
-archive=$(ls /var/backups/asa-server | sed -n "${num}p")
+if [[ ! $num =~ ^[0-9]+$ ]] || [[ $num -ge $i ]]; then
+    echo "Invalid input. Please enter a valid number."
+    exit 1
+fi
+archive=$(ls $path | sed -n "${num}p")
 
-echo "You've choosen $archive"
-echo "$archive gets restored...."
+echo "$archive is getting restored ..."
 
-tar -xzf /var/backups/asa-server/$archive -C /opt/arkserver/ShooterGame/
+tar -xzf $path/$archive -C /opt/arkserver/ShooterGame/
 
 res=$?
 
 if [[ $res == 0 ]]; then
     echo "backup restored successfully!"
-    echo "RESTORED BACKUP $archive" >> $LOG_FILE
 else
-    echo "restoring failed."
+    echo "An Error occured. Restoring failed."
 fi
