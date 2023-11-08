@@ -1,5 +1,6 @@
 #!/bin/bash
 RCON_CMDLINE=( rcon -a 127.0.0.1:${RCON_PORT} -p ${ARK_ADMIN_PASSWORD} )
+EOS_FILE=/opt/manager/.eos.config
 
 get_and_check_pid() {
     # Get PID
