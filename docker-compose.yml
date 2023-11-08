@@ -3,8 +3,8 @@ version: '3'
 services:
   asa_server:
     tty: true
-    container_name: asa_server
     restart: unless-stopped
+    image: azixus/ark-ascended-docker
     build:
       context: .
       args:
