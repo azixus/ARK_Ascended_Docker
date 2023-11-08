@@ -187,6 +187,17 @@ backup(){
     fi
 }
 
+restoreBackup(){
+    echo "Stopping the server."
+    sleep 5
+    # restoring the backup
+    /opt/manager/manager_restore_backup.sh
+    
+    sleep 5
+    start
+}
+
+
 
 # Main function
 main() {
@@ -218,8 +229,11 @@ main() {
         "backup")
             backup
             ;;
+        "restore")
+            restoreBackup
+            ;;
         *)
-            echo "Invalid action. Supported actions: status, start, stop, restart, saveworld, rcon, update, backup."
+            echo "Invalid action. Supported actions: status, start, stop, restart, saveworld, rcon, update, backup, restore."
             exit 1
             ;;
     esac
