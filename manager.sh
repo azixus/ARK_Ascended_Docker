@@ -11,4 +11,4 @@ container=$($sudo_cmd docker compose ps -q)
 
 # Use docker exec, instead of docker compose exec as the latter does not
 # override env variables.
-$sudo_cmd docker exec --env-file .env "$container" manager "${@}"
+$sudo_cmd docker exec --env-file .env --env-file .env-advanced -it "$container" manager "${@}"
