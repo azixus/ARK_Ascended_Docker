@@ -2,7 +2,7 @@
 set -e
 # create backup folder if it not already exists
 path="/var/backups/asa-server"
-mkdir -p 
+mkdir -p $path
 
 archive_name=$(date +"%Y-%m-%d_%H-%M-%S")
 
