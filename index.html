@@ -1,14 +1,293 @@
-<html>
-  <head>
-    <title>ARK Survival Ascended Server on Docker</title>
-    <meta name="google-site-verification" content="QcozzwjcfofcdaURG_OopEP3uyGmWzcL56iMC2i9MnU" />
-    <!-- Lightweight client-side loader that feature-detects and load polyfills only when necessary -->
-    <script src="https://cdn.jsdelivr.net/npm/@webcomponents/webcomponentsjs@2/webcomponents-loader.min.js"></script>
-    <!-- Load the element definition -->
-    <script type="module" src="https://cdn.jsdelivr.net/gh/zerodevx/zero-md@1/src/zero-md.min.js"></script>
-  </head>
-  <body>
-    <!-- Simply set the `src` attribute to your MD file and win -->
-    <zero-md src="README.md"></zero-md>
-  </body>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="google-site-verification" content="QcozzwjcfofcdaURG_OopEP3uyGmWzcL56iMC2i9MnU" />
+  <title>ARK Survival Ascended Server on Docker</title>
+  <style>
+    html {
+      line-height: 1.5;
+      font-family: Georgia, serif;
+      font-size: 20px;
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 1em;
+      }
+    }
+    @media print {
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, 'Lucida Console', Consolas, monospace;
+      font-size: 85%;
+      margin: 0;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    span.underline{text-decoration: underline;}
+    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<h1 id="ark-survival-ascended-docker-server">ARK Survival Ascended Docker Server</h1>
+<p>This project relies on GloriousEggroll's Proton-GE in order to run the ARK Survival Ascended Server inside a docker container under Linux. This allows to run the ASA Windows server binaries on Linux easily.</p>
+<h3 id="configuration">Configuration</h3>
+<p>The main server configuration is done through the <a href="./.env">.env</a> file. This allows you to change the server name, port, passwords etc.</p>
+<p>The server files are stored in a mounted volume in the <a href="./ark_data/">ark_data</a> folder. The additional configuration files are found in this folder: <a href="./ark_data/ShooterGame/Saved/Config/WindowsServer/Game.ini">Game.ini</a>, <a href="./ark_data/ShooterGame/Saved/Config/WindowsServer/GameUserSettings.ini">GameUserSettings.ini</a>.</p>
+<p>Unlike ARK Survival Evolved, only one port must be exposed to the internet, namely the <code>SERVER_PORT</code>. It is not necessary to expose the <code>RCON_PORT</code>.</p>
+<h3 id="usage">Usage</h3>
+<p>Download the container by cloning the repo and setting permissions:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> git clone https://github.com/AziXus/ASA_Server_Docker.git</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> cd ASA_Server_Docker</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> sudo chown <span class="at">-R</span> 1000:1000 ./ark_data</span></code></pre></div>
+<p>Before starting the container, edit the <a href="./.env">.env</a> file to customize the starting parameters of the server. You may also edit <a href="./ark_data/ShooterGame/Saved/Config/WindowsServer/Game.ini">Game.ini</a> and <a href="./ark_data/ShooterGame/Saved/Config/WindowsServer/GameUserSettings.ini">GameUserSettings.ini</a> for additional settings. Once this is done, start the container as follow:</p>
+<pre><code>$ docker compose up -d</code></pre>
+<p>During the startup of the container, the ASA server is automatically downloaded with <code>steamcmd</code> and subsequently started. You can monitor the progress with the following command:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> docker compose logs <span class="at">-f</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">asa_server</span>  <span class="kw">|</span><span class="ex">[2023.10.31-17.06.19:714][</span>  0]Log file open, 10/31/23 17:06:19</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="ex">asa_server</span>  <span class="kw">|</span><span class="ex">[2023.10.31-17.06.19:715][</span>  0]LogMemory: Platform Memory Stats for WindowsServer</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="ex">asa_server</span>  <span class="kw">|</span><span class="ex">[2023.10.31-17.06.19:715][</span>  0]LogMemory: Process Physical Memory: 319.32 MB used, 323.19 MB peak</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="ex">asa_server</span>  <span class="kw">|</span><span class="ex">[2023.10.31-17.06.19:715][</span>  0]LogMemory: Process Virtual Memory: 269.09 MB used, 269.09 MB peak</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="ex">asa_server</span>  <span class="kw">|</span><span class="ex">[2023.10.31-17.06.19:715][</span>  0]LogMemory: Physical Memory: 20649.80 MB used,  43520.50 MB free, 64170.30 MB total</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="ex">asa_server</span>  <span class="kw">|</span><span class="ex">[2023.10.31-17.06.19:715][</span>  0]LogMemory: Virtual Memory: 33667.16 MB used,  63238.14 MB free, 96905.30 MB total</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="ex">asa_server</span>  <span class="kw">|</span><span class="ex">[2023.10.31-17.06.20:506][</span>  0]ARK Version: 25.49</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="ex">asa_server</span>  <span class="kw">|</span><span class="ex">[2023.10.31-17.06.21:004][</span>  0]Primal Game Data Took 0.35 seconds</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="ex">asa_server</span>  <span class="kw">|</span><span class="ex">[2023.10.31-17.06.58:846][</span>  0]Server: <span class="st">&quot;My Awesome ASA Server&quot;</span> has successfully started!</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="ex">asa_server</span>  <span class="kw">|</span><span class="ex">[2023.10.31-17.06.59:188][</span>  0]Commandline:  TheIsland_WP<span class="pp">?</span>listen<span class="pp">?</span>SessionName=<span class="st">&quot;My Awesome ASA Server&quot;</span><span class="pp">?</span>Port=7790<span class="pp">?</span>MaxPlayers=10<span class="pp">?</span>ServerPassword=MyServerPassword<span class="pp">?</span>ServerAdminPassword=<span class="st">&quot;MyArkAdminPassword&quot;</span><span class="pp">?</span>RCONEnabled=True<span class="pp">?</span>RCONPort=32330<span class="pp">?</span>ServerCrosshair=true<span class="pp">?</span>OverrideStructurePlatformPrevention=true<span class="pp">?</span>OverrideOfficialDifficulty=5.0<span class="pp">?</span>ShowFloatingDamageText=true<span class="pp">?</span>AllowFlyerCarryPvE=true <span class="at">-log</span> <span class="at">-NoBattlEye</span> <span class="at">-WinLiveMaxPlayers</span><span class="op">=</span>10 <span class="at">-ForceAllowCaveFlyers</span> <span class="at">-ForceRespawnDinos</span> <span class="at">-AllowRaidDinoFeeding</span><span class="op">=</span>true <span class="at">-ActiveEvent</span><span class="op">=</span>Summer</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="ex">asa_server</span>  <span class="kw">|</span><span class="ex">[2023.10.31-17.06.59:188][</span>  0]Full Startup: 40.73 seconds</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="ex">asa_server</span>  <span class="kw">|</span><span class="ex">[2023.10.31-17.06.59:188][</span>  0]Number of cores 6</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="ex">asa_server</span>  <span class="kw">|</span><span class="ex">[2023.10.31-17.07.03:329][</span>  2]wp.Runtime.HLOD = <span class="st">&quot;1&quot;</span></span></code></pre></div>
+<h3 id="manager-commands">Manager commands</h3>
+<p>The manager script supports several commands that we highlight below.</p>
+<p><strong>Server start</strong></p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> ./manager.sh start</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="ex">Starting</span> server on port 7790</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="ex">Server</span> should be up in a few minutes</span></code></pre></div>
+<p><strong>Server stop</strong></p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> ./manager.sh stop</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="ex">Stopping</span> server gracefully...</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="ex">Waiting</span> 30s for the server to stop</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="ex">Done</span></span></code></pre></div>
+<p><strong>Server restart</strong></p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> ./manager.sh restart</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="ex">Stopping</span> server gracefully...</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="ex">Waiting</span> 30s for the server to stop</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="ex">Done</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="ex">Starting</span> server on port 7790</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="ex">Server</span> should be up in a few minutes</span></code></pre></div>
+<p><strong>Server status</strong></p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> ./manager.sh status</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="ex">Server</span> PID 124</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="ex">Server</span> listening on port 7790</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="ex">Server</span> is up</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="ex">0</span> players connected</span></code></pre></div>
+<p><strong>Saving the world</strong></p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> ./manager.sh saveworld</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="ex">Saving</span> world...</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="ex">Success!</span></span></code></pre></div>
+<p><strong>Server update</strong></p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> ./manager.sh update</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="ex">Updating</span> ARK Ascended Server</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="ex">Saving</span> world...</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="ex">Success!</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="ex">Stopping</span> server gracefully...</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="ex">Waiting</span> 30s for the server to stop</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="ex">Done</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="bu">[</span>  0%] Checking for <span class="er">available</span> <span class="ex">updates...</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="ex">[----]</span> Verifying installation...</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="ex">Steam</span> Console Client <span class="er">(</span><span class="ex">c</span><span class="kw">)</span> <span class="ex">Valve</span> Corporation <span class="at">-</span> version 1698262904</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a> <span class="ex">Update</span> state <span class="er">(</span><span class="ex">0x5</span><span class="kw">)</span> <span class="ex">verifying</span> install, progress: 94.34 <span class="er">(</span><span class="ex">8987745741</span> / 9527248082<span class="kw">)</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="ex">Success!</span> App <span class="st">&#39;2430930&#39;</span> fully installed.</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="ex">Update</span> completed</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="ex">Starting</span> server on port 7790</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="ex">Server</span> should be up in a few minutes</span></code></pre></div>
+<p><strong>RCON commands</strong></p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> ./manager.sh rcon <span class="st">&quot;Broadcast Hello World&quot;</span>   </span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="ex">Server</span> received, But no response!!</span></code></pre></div>
+</body>
 </html>
