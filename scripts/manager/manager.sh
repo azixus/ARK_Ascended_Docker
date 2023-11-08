@@ -172,16 +172,21 @@ update() {
 
 backup(){
     echo "Creating backup. Backups are saved in your ark_backup folder"
+    # saving before creating the backup
+    saveworld
+    # sleep is nessecary because the server seems to write save files after the saveworld function ends and thus tar runs into errors.
+    sleep 10
     # Use backup script
     /opt/manager/manager_backup.sh
-    
+
     res=$?
-    if[[$res==0]]; then
-        echo "BACKUP CREATED" >> LOG_FILE
+    if [[ $res == 0 ]]; then
+        echo "BACKUP CREATED" >> $LOG_FILE
     else
         echo "creating backup failed"
     fi
 }
+
 
 # Main function
 main() {
