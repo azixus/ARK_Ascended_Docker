@@ -13,4 +13,4 @@ tar -czf $path/backup_${archive_name}.tar.gz -C /opt/arkserver/ShooterGame Saved
 count=$(ls $path | wc -l)
 
 echo "Number of backups in path: ${count}"
-echo "Size of Backup folder: $(du -hs $path)
+echo "Size of Backup folder: $(du -hs $path)"

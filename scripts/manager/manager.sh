@@ -175,7 +175,7 @@ backup(){
     # saving before creating the backup
     saveworld
     # sleep is nessecary because the server seems to write save files after the saveworld function ends and thus tar runs into errors.
-    sleep 10
+    sleep 5
     # Use backup script
     /opt/manager/manager_backup.sh
 
