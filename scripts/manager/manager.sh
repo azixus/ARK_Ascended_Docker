@@ -172,10 +172,16 @@ update() {
 
 backup(){
     echo "Creating backup. Backups are saved in your ark_backup folder"
+    # Use backup script
+    /opt/manager/manager_backup.sh
     
-    nohup /opt/manager/manager_backup.sh
-
-
+    res=$?
+    if[[$res==0]] 
+    then
+        echo "BACKUP CREATED" >> LOG_FILE
+    else
+        echo "creating backup failed"
+    fi
 }
 
 # Main function
