@@ -163,23 +163,24 @@ status() {
 
     echo -e "Server Port:    ${ark_port}"
 
-    if [[ "$enable_full_status" == true ]]; then
-        full_status_display
-    else
-        # Check number of players
-        out=$(${RCON_CMDLINE[@]} ListPlayers 2>/dev/null)
-        res=$?
-        if [[ $res == 0 ]]; then
+    # Check initial status with rcon command
+    out=$(${RCON_CMDLINE[@]} ListPlayers 2>/dev/null)
+    res=$?
+    if [[ $res == 0 ]]; then
+        # Once rcon is up, query EOS if requested
+        if [[ "$enable_full_status" == true ]]; then
+            full_status_display
+        else            
             num_players=0
             if [[ "$out" != "No Players"* ]]; then
                 num_players=$(echo "$out" | wc -l)
             fi
             echo -e "Players:        ${num_players} / ?"
             echo "Server is up"
-        else
-            echo "Server is down"
         fi
-    fi 
+    else
+        echo "Server is down"
+    fi
 }
 
 start() {
