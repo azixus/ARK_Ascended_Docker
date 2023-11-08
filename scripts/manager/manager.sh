@@ -189,6 +189,7 @@ backup(){
 
 restoreBackup(){
     echo "Stopping the server."
+    stop
     sleep 5
     # restoring the backup
     /opt/manager/manager_restore_backup.sh
