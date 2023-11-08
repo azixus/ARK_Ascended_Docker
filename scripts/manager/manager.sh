@@ -176,8 +176,7 @@ backup(){
     /opt/manager/manager_backup.sh
     
     res=$?
-    if[[$res==0]] 
-    then
+    if[[$res==0]]; then
         echo "BACKUP CREATED" >> LOG_FILE
     else
         echo "creating backup failed"
