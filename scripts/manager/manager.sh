@@ -192,11 +192,11 @@ restoreBackup(){
     if [[ $backup_count > 0 ]]; then
         echo "Stopping the server."
         stop
-        sleep 5
+        sleep 3
         # restoring the backup
         /opt/manager/manager_restore_backup.sh
         
-        sleep 5
+        sleep 2
         start
     else
         echo "You haven't created any backups yet."
