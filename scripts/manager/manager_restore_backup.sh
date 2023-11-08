@@ -25,6 +25,7 @@ res=$?
 
 if [[ $res == 0 ]]; then
     echo "backup restored successfully!"
+    echo "RESTORED BACKUP $archive" >> $LOG_FILE
 else
     echo "restoring failed."
 fi
