@@ -17,37 +17,169 @@ get_and_check_pid() {
     fi
 }
 
+full_status_setup() {
+    # Check PDB is still available
+    if [[ ! -f "/opt/arkserver/ShooterGame/Binaries/Win64/ArkAscendedServer.pdb" ]]; then 
+        echo "/opt/arkserver/ShooterGame/Binaries/Win64/ArkAscendedServer.pdb is needed to setup full status."
+        return 1
+    fi
+
+    # Download pdb-sym2addr-rs and extract it to /opt/manager/pdb-sym2addr
+    wget -q https://github.com/azixus/pdb-sym2addr-rs/releases/latest/download/pdb-sym2addr-x86_64-unknown-linux-musl.tar.gz -O /opt/manager/pdb-sym2addr-x86_64-unknown-linux-musl.tar.gz
+    tar -xzf /opt/manager/pdb-sym2addr-x86_64-unknown-linux-musl.tar.gz -C /opt/manager
+    rm /opt/manager/pdb-sym2addr-x86_64-unknown-linux-musl.tar.gz
+
+    # Extract EOS login
+    symbols=$(/opt/manager/pdb-sym2addr /opt/arkserver/ShooterGame/Binaries/Win64/ArkAscendedServer.exe /opt/arkserver/ShooterGame/Binaries/Win64/ArkAscendedServer.pdb DedicatedServerClientSecret DedicatedServerClientId DeploymentId)
+
+    client_id=$(echo "$symbols" | grep -o 'DedicatedServerClientId.*' | cut -d, -f2)
+    client_secret=$(echo "$symbols" | grep -o 'DedicatedServerClientSecret.*' | cut -d, -f2)
+    deployment_id=$(echo "$symbols" | grep -o 'DeploymentId.*' | cut -d, -f2)
+
+    # Save base64 login and deployment id to file
+    creds=$(echo -n "$client_id:$client_secret" | base64 -w0)
+    echo "${creds},${deployment_id}" > "$EOS_FILE"
+
+    return 0
+}
+
+full_status_first_run() {
+    read -p "To display the full status, the EOS API credentials will have to be extracted from the server binary files and pdb-sym2addr-rs (azixus/pdb-sym2addr-rs) will be downloaded. Do you want to proceed [y/n]?: " -n 1 -r
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        return 1
+    fi
+
+    full_status_setup
+    return $?
+}
+
+full_status_display() {
+    creds=$(cat "$EOS_FILE" | cut -d, -f1)
+    id=$(cat "$EOS_FILE" | cut -d, -f2)
+
+    # Recover current ip
+    ip=$(curl -s https://ifconfig.me/ip)
+
+    # Recover and extract oauth token
+    oauth=$(curl -s -H 'Content-Type: application/x-www-form-urlencoded' -H 'Accept: application/json' -H "Authorization: Basic ${creds}" -X POST https://api.epicgames.dev/auth/v1/oauth/token -d "grant_type=client_credentials&deployment_id=${id}")
+    token=$(echo "$oauth" | jq -r '.access_token')
+
+    # Send query to get server(s) registered under public ip
+    res=$(curl -s -X "POST" "https://api.epicgames.dev/matchmaking/v1/${id}/filter"    \
+        -H "Content-Type:application/json"      \
+        -H "Accept:application/json"            \
+        -H "Authorization: Bearer $token"       \
+        -d "{\"criteria\": [{\"key\": \"attributes.ADDRESS_s\", \"op\": \"EQUAL\", \"value\": \"${ip}\"}]}")
+
+    # Check there was no error
+    if [[ "$res" == *"errorCode"* ]]; then
+        echo "Failed to query EOS... Please run command again."
+        full_status_setup
+        return
+    fi
+    
+    # Extract correct server based on server port
+    serv=$(echo "$res" | jq -r ".sessions[] | select( .attributes.ADDRESSBOUND_s | contains(\":${SERVER_PORT}\"))")
+    
+    if [[ -z "$serv" ]]; then
+        echo "Server is down"
+        return
+    fi
+
+    # Extract variables
+    mapfile -t vars < <(echo "$serv" | jq -r '
+            .totalPlayers,
+            .settings.maxPublicPlayers,
+            .attributes.CUSTOMSERVERNAME_s,
+            .attributes.DAYTIME_s,
+            .attributes.SERVERUSESBATTLEYE_b,
+            .attributes.ADDRESS_s,
+            .attributes.ADDRESSBOUND_s,
+            .attributes.MAPNAME_s,
+            .attributes.BUILDID_s,
+            .attributes.MINORBUILDID_s,
+            .attributes.SESSIONISPVE_l,
+            .attributes.ENABLEDMODS_s
+        ')
+
+    curr_players=${vars[0]}
+    max_players=${vars[1]}
+    serv_name=${vars[2]}
+    day=${vars[3]}
+    battleye=${vars[4]}
+    ip=${vars[5]}
+    bind=${vars[6]}
+    map=${vars[7]}
+    major=${vars[8]}
+    minor=${vars[9]}
+    pve=${vars[10]}
+    mods=${vars[11]}
+    bind_ip=${bind%:*}
+    bind_port=${bind#*:}
+
+    if [[ "${mods}" == "null" ]]; then
+        mods="-"
+    fi
+
+    echo -e "Server Name:    ${serv_name}"
+    echo -e "Map:            ${map}"
+    echo -e "Day:            ${day}"
+    echo -e "Players:        ${curr_players} / ${max_players}"
+    echo -e "Mods:           ${mods}"
+    echo -e "Server Version: ${major}.${minor}"
+    echo -e "Server Address: ${ip}:${bind_port}"
+    echo "Server is up"
+}
+
 status() {
+    enable_full_status=false
+    # Execute initial EOS setup, true if no error
+    if [[ "$1" == "--full" ]] ; then
+        # If EOS file exists, no need to run initial setup
+        if [[ -f "$EOS_FILE" ]]; then
+            enable_full_status=true
+        else
+            full_status_first_run
+            res=$?
+            if [[ $res -eq 0 ]]; then
+                enable_full_status=true
+            fi
+        fi
+    fi
+
     # Get server PID
     ark_pid=$(get_and_check_pid)
     if [[ "$ark_pid" == 0 ]]; then
         echo "Server PID not found (server offline?)"
         return
     fi    
-
-    echo "Server PID $ark_pid"
+    echo -e "Server PID:     ${ark_pid}"
 
     ark_port=$(ss -tupln | grep "GameThread" | grep -oP '(?<=:)\d+')
     if [[ -z "$ark_port" ]]; then
-        echo "Server not listening"
+        echo -e "Server Port:    Not Listening"
         return
     fi
 
-    echo "Server listening on port $ark_port"
-    
-    # Check number of players
-    out=$(${RCON_CMDLINE[@]} ListPlayers 2>/dev/null)
-    res=$?
-    if [[ $res == 0 ]]; then
-        echo "Server is up"
-        num_players=0
-        if [[ "$out" != "No Players"* ]]; then
-            num_players=$(echo "$out" | wc -l)
-        fi
-        echo "$num_players players connected"
+    echo -e "Server Port:    ${ark_port}"
+
+    if [[ "$enable_full_status" == true ]]; then
+        full_status_display
     else
-        echo "Server is down"
-    fi
+        # Check number of players
+        out=$(${RCON_CMDLINE[@]} ListPlayers 2>/dev/null)
+        res=$?
+        if [[ $res == 0 ]]; then
+            num_players=0
+            if [[ "$out" != "No Players"* ]]; then
+                num_players=$(echo "$out" | wc -l)
+            fi
+            echo -e "Players:        ${num_players} / ?"
+            echo "Server is up"
+        else
+            echo "Server is down"
+        fi
+    fi 
 }
 
 start() {
@@ -177,7 +309,7 @@ main() {
 
     case "$action" in
         "status")
-            status
+            status "$option"
             ;;
         "start")
             start
