@@ -33,7 +33,7 @@ RUN         mkdir /opt/arkserver
 RUN         set -ex; \
             dpkg --add-architecture i386; \
             apt update; \
-            apt install -y --no-install-recommends wget curl sudo iproute2 procps software-properties-common dbus lib32gcc-s1
+            apt install -y --no-install-recommends wget curl jq sudo iproute2 procps software-properties-common dbus lib32gcc-s1
 
 # Download steamcmd
 RUN         set -ex; \

@@ -68,13 +68,30 @@ Starting server on port 7790
 Server should be up in a few minutes
 ```
 
-**Server status**
+**Server status**  
+The standard status command displays some basic information about the server, the server PID, the listening port and the number of players currently connected.
 ```bash
 $ ./manager.sh status
-Server PID 124
-Server listening on port 7790
+Server PID:     109
+Server Port:    7790
+Players:        0 / ?
 Server is up
-0 players connected
+```
+
+You can obtain more information with the `--full` flag which queries the Epic Online Services by extracting the API credentials from the server binaries.
+```
+./manager.sh status --full                                             
+To display the full status, the EOS API credentials will have to be extracted from the server binary files and pdb-sym2addr-rs (azixus/pdb-sym2addr-rs) will be downloaded. Do you want to proceed [y/n]?: y
+Server PID:     109
+Server Port:    7790
+Server Name:    My Awesome ASA Server
+Map:            TheIsland_WP
+Day:            1
+Players:        0 / 10
+Mods:           -
+Server Version: 26.11
+Server Address: 1.2.3.4:7790
+Server is up
 ```
 
 **Saving the world**
