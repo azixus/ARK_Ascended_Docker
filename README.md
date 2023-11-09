@@ -14,7 +14,7 @@ Download the container by cloning the repo and setting permissions:
 ```bash
 $ git clone https://github.com/AziXus/ASA_Server_Docker.git
 $ cd ASA_Server_Docker
-$ sudo chown -R 1000:1000 ./ark_data
+$ sudo chown -R 1000:1000 ./ark_*/
 ```
 
 Before starting the container, edit the [.env](./.env) file to customize the starting parameters of the server. You may also edit [Game.ini](./ark_data/ShooterGame/Saved/Config/WindowsServer/Game.ini) and [GameUserSettings.ini](./ark_data/ShooterGame/Saved/Config/WindowsServer/GameUserSettings.ini) for additional settings. Once this is done, start the container as follow:
@@ -120,6 +120,45 @@ Starting server on port 7790
 Server should be up in a few minutes
 ```
 
+**Server create Backup**
+
+The manager supports creating backups of your savegame and all config files. Backups are stores in the ./ark_backup volume. 
+
+_No Server shutdown needed._
+```bash
+./manager.sh backup
+Creating backup. Backups are saved in your ./ark_backup volume.
+Saving world...
+Success!
+Number of backups in path: 6
+Size of Backup folder: 142M     /var/backups/asa-server
+```
+
+**Server restore Backup**
+
+The manager supports restoring a previously created backup. After using `./manager.sh restore` the manager will print out a list of all created backups and simply ask you which one you want to recover from.
+
+_The server automatically get's restarted when restoring to a backup._
+```bash
+./manager.sh restore
+Stopping the server.
+Stopping server gracefully...
+Waiting 30s for the server to stop
+Done
+Here is a list of all your backup archives:
+1 - - - - - File: backup_2023-11-08_19-11-24.tar.gz
+2 - - - - - File: backup_2023-11-08_19-13-09.tar.gz
+3 - - - - - File: backup_2023-11-08_19-36-49.tar.gz
+4 - - - - - File: backup_2023-11-08_20-48-44.tar.gz
+5 - - - - - File: backup_2023-11-08_21-20-19.tar.gz
+6 - - - - - File: backup_2023-11-08_21-21-10.tar.gz
+Please input the number of the archive you want to restore.
+4
+backup_2023-11-08_20-48-44.tar.gz is getting restored ...
+backup restored successfully!
+Starting server on port 7790
+Server should be up in a few minutes
+```
 **RCON commands**
 ```bash
 $ ./manager.sh rcon "Broadcast Hello World"   

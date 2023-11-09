@@ -15,6 +15,7 @@ services:
       - .env
     volumes:
       - ./ark_data:/opt/arkserver
+      - ./ark_backup:/var/backups/asa-server
       - steam_data:/opt/steamcmd
     ports:
       # Port for connections from ARK game client
