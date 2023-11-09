@@ -170,6 +170,41 @@ update() {
     start
 }
 
+backup(){
+    echo "Creating backup. Backups are saved in your ./ark_backup volume."
+    # saving before creating the backup
+    saveworld
+    # sleep is nessecary because the server seems to write save files after the saveworld function ends and thus tar runs into errors.
+    sleep 5
+    # Use backup script
+    /opt/manager/manager_backup.sh
+
+    res=$?
+    if [[ $res == 0 ]]; then
+        echo "BACKUP CREATED" >> $LOG_FILE
+    else
+        echo "creating backup failed"
+    fi
+}
+
+restoreBackup(){
+    backup_count=$(ls /var/backups/asa-server/ | wc -l)
+    if [[ $backup_count > 0 ]]; then
+        echo "Stopping the server."
+        stop
+        sleep 3
+        # restoring the backup
+        /opt/manager/manager_restore_backup.sh
+        
+        sleep 2
+        start
+    else
+        echo "You haven't created any backups yet."
+    fi
+}
+
+
+
 # Main function
 main() {
     action="$1"
@@ -197,8 +232,14 @@ main() {
         "update") 
             update
             ;;
+        "backup")
+            backup
+            ;;
+        "restore")
+            restoreBackup
+            ;;
         *)
-            echo "Invalid action. Supported actions: status, start, stop, restart, saveworld, rcon, update."
+            echo "Invalid action. Supported actions: status, start, stop, restart, saveworld, rcon, update, backup, restore."
             exit 1
             ;;
     esac
