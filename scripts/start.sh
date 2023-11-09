@@ -28,5 +28,5 @@ trap "manager stop --saveworld" SIGTERM
 # Start tail process in the background, then wait for tail to finish.
 # This is just a hack to catch SIGTERM signals, tail does not forward
 # the signals.
-tail -f "${LOG_FILE}" &
+tail -F "${LOG_FILE}" &
 wait $!
