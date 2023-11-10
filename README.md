@@ -185,3 +185,27 @@ Server should be up in a few minutes
 $ ./manager.sh rcon "Broadcast Hello World"   
 Server received, But no response!!
 ```
+### Hypervisors
+
+**Proxmox VM**
+
+The default CPU type (kvm64) in proxmox for linux VMs does not seem to implement all features needed to run the server. When running the docker container check your log files in *./ark_data/ShooterGame/Saved/Logs* you might see a .crashstack file with contents similiar to:
+```
+Fatal error!
+
+CL: 450696 
+0x000000007b00cdb7 kernelbase.dll!UnknownFunction []
+0x0000000143c738ca ArkAscendedServer.exe!UnknownFunction []
+0x00000002c74d5ef7 ucrtbase.dll!UnknownFunction []
+0x00000002c74b030b ucrtbase.dll!UnknownFunction []
+0x00000001400243c2 ArkAscendedServer.exe!UnknownFunction []
+0x0000000144319ec7 ArkAscendedServer.exe!UnknownFunction []
+0x0000000141fa99ad ArkAscendedServer.exe!UnknownFunction []
+0x000000014447c9b8 ArkAscendedServer.exe!UnknownFunction []
+0x0000000145d2b64d ArkAscendedServer.exe!UnknownFunction []
+0x0000000145d2b051 ArkAscendedServer.exe!UnknownFunction []
+0x0000000145d2d732 ArkAscendedServer.exe!UnknownFunction []
+0x0000000145d10425 ArkAscendedServer.exe!UnknownFunction []
+0x0000000145d01628 ArkAscendedServer.exe!UnknownFunction []
+```
+In that case just change your CPU type to host in the hardware settings of your VM. After a restart of the VM the container should work without any issues.
