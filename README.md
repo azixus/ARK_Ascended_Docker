@@ -43,6 +43,8 @@ The server files are stored in a mounted volume in the [ark_data](./ark_data/) f
 Unlike ARK Survival Evolved, only one port must be exposed to the internet, namely the `SERVER_PORT`. It is not necessary to expose the `RCON_PORT`.
 
 #### Configuration variables
+We list some configuration options that may be used to customize the server below. Quotes in the `.env` file must not be used in most circumstances, you should only use them for certain flags such as `-BanListURL="http://banlist"`.
+
 | Name | Description | Default |
 | --- | --- | --- |
 | SERVER_MAP | Server map. | TheIsland_WP |
