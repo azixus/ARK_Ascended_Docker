@@ -2,12 +2,6 @@
 
 This project relies on GloriousEggroll's Proton-GE in order to run the ARK Survival Ascended Server inside a docker container under Linux. This allows to run the ASA Windows server binaries on Linux easily.
 
-### Configuration
-The main server configuration is done through the [.env](./.env) file. This allows you to change the server name, port, passwords etc.
-
-The server files are stored in a mounted volume in the [ark_data](./ark_data/) folder. The additional configuration files are found in this folder: [Game.ini](./ark_data/ShooterGame/Saved/Config/WindowsServer/Game.ini), [GameUserSettings.ini](./ark_data/ShooterGame/Saved/Config/WindowsServer/GameUserSettings.ini).
-
-Unlike ARK Survival Evolved, only one port must be exposed to the internet, namely the `SERVER_PORT`. It is not necessary to expose the `RCON_PORT`.
 
 ### Usage
 Download the container by cloning the repo and setting permissions:
@@ -39,6 +33,33 @@ asa_server  |[2023.10.31-17.06.59:188][  0]Full Startup: 40.73 seconds
 asa_server  |[2023.10.31-17.06.59:188][  0]Number of cores 6
 asa_server  |[2023.10.31-17.07.03:329][  2]wp.Runtime.HLOD = "1"
 ```
+
+
+### Configuration
+The main server configuration is done through the [.env](./.env) file. This allows you to change the server name, port, passwords etc.
+
+The server files are stored in a mounted volume in the [ark_data](./ark_data/) folder. The additional configuration files are found in this folder: [Game.ini](./ark_data/ShooterGame/Saved/Config/WindowsServer/Game.ini), [GameUserSettings.ini](./ark_data/ShooterGame/Saved/Config/WindowsServer/GameUserSettings.ini).
+
+Unlike ARK Survival Evolved, only one port must be exposed to the internet, namely the `SERVER_PORT`. It is not necessary to expose the `RCON_PORT`.
+
+#### Configuration variables
+We list some configuration options that may be used to customize the server below. Quotes in the `.env` file must not be used in most circumstances, you should only use them for certain flags such as `-BanListURL="http://banlist"`.
+
+| Name | Description | Default |
+| --- | --- | --- |
+| SERVER_MAP | Server map. | TheIsland_WP |
+| SESSION_NAME | Name of the server. | My Awesome ASA Server |
+| SERVER_PORT | Server listening port. | 7790 |
+| MAX_PLAYERS | Maximum number of players. | 10 |
+| SERVER_PASSWORD | Password required to join the server. Comment the variable to disable it. | MyServerPassword |
+| ARK_ADMIN_PASSWORD | Password required for cheats and RCON. | MyArkAdminPassword |
+| RCON_PORT | Port used to connect through RCON. To access RCON remotely, uncomment `#- "${RCON_PORT}:${RCON_PORT}/tcp"` in `docker-compose.yml`. | 32330 |
+| DISABLE_BATTLEYE | Comment to enable BattlEye on the server. | BattlEye Disabled |
+| MODS | Comma-separated list of mods to install on the server. | Disabled |
+| ARK_EXTRA_OPTS | Extra ?Argument=Value to add to the startup command. | ?ServerCrosshair=true?OverrideStructurePlatformPrevention=true?OverrideOfficialDifficulty=5.0?ShowFloatingDamageText=true?AllowFlyerCarryPvE=true |
+| ARK_EXTRA_DASH_OPTS | Extra dash arguments to add to the startup command. | -ForceAllowCaveFlyers -ForceRespawnDinos -AllowRaidDinoFeeding=true -ActiveEvent=Summer |
+
+To increase the available server memory, in [docker-compose.yml](./docker-compose.yml), increase the `deploy, resources, limits, memory: 16g` to a higher value.
 
 ### Manager commands
 The manager script supports several commands that we highlight below. 
@@ -164,3 +185,27 @@ Server should be up in a few minutes
 $ ./manager.sh rcon "Broadcast Hello World"   
 Server received, But no response!!
 ```
+### Hypervisors
+
+**Proxmox VM**
+
+The default CPU type (kvm64) in proxmox for linux VMs does not seem to implement all features needed to run the server. When running the docker container check your log files in *./ark_data/ShooterGame/Saved/Logs* you might see a .crashstack file with contents similiar to:
+```
+Fatal error!
+
+CL: 450696 
+0x000000007b00cdb7 kernelbase.dll!UnknownFunction []
+0x0000000143c738ca ArkAscendedServer.exe!UnknownFunction []
+0x00000002c74d5ef7 ucrtbase.dll!UnknownFunction []
+0x00000002c74b030b ucrtbase.dll!UnknownFunction []
+0x00000001400243c2 ArkAscendedServer.exe!UnknownFunction []
+0x0000000144319ec7 ArkAscendedServer.exe!UnknownFunction []
+0x0000000141fa99ad ArkAscendedServer.exe!UnknownFunction []
+0x000000014447c9b8 ArkAscendedServer.exe!UnknownFunction []
+0x0000000145d2b64d ArkAscendedServer.exe!UnknownFunction []
+0x0000000145d2b051 ArkAscendedServer.exe!UnknownFunction []
+0x0000000145d2d732 ArkAscendedServer.exe!UnknownFunction []
+0x0000000145d10425 ArkAscendedServer.exe!UnknownFunction []
+0x0000000145d01628 ArkAscendedServer.exe!UnknownFunction []
+```
+In that case just change your CPU type to host in the hardware settings of your VM. After a restart of the VM the container should work without any issues.
