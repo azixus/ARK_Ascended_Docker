@@ -21,7 +21,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-FROM        debian:bullseye-slim
+FROM        debian:bookworm-slim
 
 # Arguments defining arkuser's uid and gid
 ARG         PUID
@@ -33,7 +33,12 @@ RUN         mkdir /opt/arkserver
 RUN         set -ex; \
             dpkg --add-architecture i386; \
             apt update; \
-            apt install -y --no-install-recommends wget curl jq sudo iproute2 procps software-properties-common dbus lib32gcc-s1
+            apt install -y --no-install-recommends wget curl jq sudo iproute2 procps software-properties-common dbus lib32gcc-s1 locales locales-all python3-pip
+
+# Set locale
+ENV         LC_ALL en_US.UTF-8
+ENV         LANG en_US.UTF-8
+ENV         LANGUAGE en_US.UTF-8
 
 # Download steamcmd
 RUN         set -ex; \
@@ -54,13 +59,6 @@ RUN         set -ex; \
             rm /var/lib/dbus/machine-id; \
             dbus-uuidgen --ensure
 
-# Install rcon
-RUN         set -ex; \
-            cd /tmp/; \
-            curl -sSL https://github.com/gorcon/rcon-cli/releases/download/v0.10.3/rcon-0.10.3-amd64_linux.tar.gz > rcon.tar.gz; \
-            tar xvf rcon.tar.gz; \
-            mv rcon-0.10.3-amd64_linux/rcon /usr/local/bin/
-
 # Install tini
 ARG         TINI_VERSION
 ADD         https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
@@ -69,12 +67,20 @@ RUN         chmod +x /tini
 # Set permissions
 RUN         set -ex; \
             chown -R arkuser:arkuser /opt/arkserver; \
-            chown -R arkuser:arkuser /opt/steamcmd
+            chown -R arkuser:arkuser /opt/steamcmd; \
+			mkdir -p /opt/proton/compatdata; \
+			chown -R arkuser:arkuser /opt/proton
 
+# Install python dependencies
+COPY --chown=arkuser --chmod=755 ./scripts/manager/requirements.txt /opt/manager/requirements.txt
+RUN         python3 -m pip install -r /opt/manager/requirements.txt --break-system-packages
+
+# Copy manager files
 COPY --chown=arkuser --chmod=755 ./scripts/start.sh /opt/start.sh
 COPY --chown=arkuser --chmod=755 ./scripts/manager /opt/manager
 
-RUN         ln -s /opt/manager/manager.sh /usr/local/bin/manager
+# Add manager to bin
+RUN         ln -s /opt/manager/manager.py /usr/local/bin/manager
 
 USER        arkuser
 WORKDIR     /opt/arkserver/

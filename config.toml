@@ -1,0 +1,77 @@
+[ark]
+install_folder = "/opt/arkserver"
+appid = "2430930"
+
+# Special server configuration parameters
+[ark.config]
+map = "TheIsland_WP"
+enable_battleye = true
+
+# Main config parameters, TheIsland_WP?listen?SessionName?...?
+[ark.config.main]
+SessionName = "My Awesome ASA Server"
+ServerPassword = "MyServerPassword"
+ServerAdminPassword = "MyArkAdminPassword"
+
+Port = 7790
+RCONPort = 32330
+RCONEnabled = true
+
+ServerCrosshair = true
+OverrideOfficialDifficulty = 5.0
+ShowFloatingDamageText = true
+AllowFlyerCarryPve = true
+
+# List of flags in the format -ThisIsMyFlag, 
+# e.g., -ForceAllowCaveFlyers
+[ark.config.flags]
+ForceAllowCaveFlyers = true
+ForceRespawnDinos = true
+
+# List of options in the format -ThisIsMyOpt=value, 
+# e.g., -ActiveEvent=Summer / -AllowRaidDinoFeeding=true
+[ark.config.opts]
+ActiveEvent = "Summer"
+AllowRaidDinoFeeding = true
+WinLiveMaxPlayers = 20
+
+# Mods: Please provide a comma seperated list of the curse-forge modIDs and uncomment the MODS arg
+# e.g. MODS=931872,931338
+# MODS=
+
+# Can probably keep that in external file
+[ark.config.GameUserSettings.ServerSettings]
+AutoSavePeriodMinutes = 15
+
+# Can probably keep that in external file
+[ark.config.Game."/script/shootergame/shootergamemode"]
+MaxDifficulty = true
+
+# Backup configuration settings
+[ark.backup]
+target_dir = "/var/backups/asa-server"
+max_backup_size = "500MB"              # Size in B, MB, GB. 0 for unlimited.
+max_backup_number = "100"              # Number of backup to store. 0 for unlimited.
+
+# How to execute the ARK Ascended Server
+[ark.exec]
+start_type = "LINUX_PROTON" # LINUX_NATIVE / WINDOWS_NATIVE
+
+# Static settings
+[ark.advanced]
+pid_file = "/opt/arkserver/.server.pid"
+log_file = "/opt/arkserver/ShooterGame/Saved/Logs/ShooterGame.log"
+eos_file = "/opt/manager/.eos.conf"
+pdb-sym2addr_dl = "https://github.com/azixus/pdb-sym2addr-rs/releases/latest/download/pdb-sym2addr-x86_64-unknown-linux-musl.tar.gz"
+pdb-sym2addr_path = "/opt/manager/pdb-sym2addr"
+do_exit_timeout = 30
+
+[ark.proton]
+server_rel_binary = "ShooterGame/Binaries/Win64/ArkAscendedServer.exe"
+start_command = "proton"
+start_args = "run"
+start_env = { STEAM_COMPAT_CLIENT_INSTALL_PATH = "/opt/proton/compatdata", STEAM_COMPAT_DATA_PATH = "/opt/proton/compatdata" }
+
+[steamcmd]
+install_folder = "/opt/steamcmd"
+user = "arkuser"

@@ -14,8 +14,13 @@ services:
     env_file:
       - .env
     volumes:
+      # Single-file volume for config
+      - ./config.toml:/opt/arkserver/config.toml
+      # Volume for server files
       - ./ark_data:/opt/arkserver
+      # Volume for backups
       - ./ark_backup:/var/backups/asa-server
+      # Volume for steamcmd
       - steam_data:/opt/steamcmd
     ports:
       # Port for connections from ARK game client

@@ -1,0 +1,7 @@
+rich
+psutil
+pexpect
+tomli
+tomli-w
+rcon
+requests
