@@ -61,6 +61,7 @@ start_type = "LINUX_PROTON" # LINUX_NATIVE / WINDOWS_NATIVE
 [ark.advanced]
 pid_file = "/opt/arkserver/.server.pid"
 log_file = "/opt/arkserver/ShooterGame/Saved/Logs/ShooterGame.log"
+manager_log_file = "/opt/arkserver/manager.log"
 eos_file = "/opt/manager/.eos.conf"
 pdb-sym2addr_dl = "https://github.com/azixus/pdb-sym2addr-rs/releases/latest/download/pdb-sym2addr-x86_64-unknown-linux-musl.tar.gz"
 pdb-sym2addr_path = "/opt/manager/pdb-sym2addr"

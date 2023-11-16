@@ -5,7 +5,6 @@ from server import start, stop, restart, update
 from status import server_status
 from config import get_config
 
-
 def main():
     # Initializes common parser arguments, e.g. start/restart,
 

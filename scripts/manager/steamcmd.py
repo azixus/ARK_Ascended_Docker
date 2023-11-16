@@ -1,28 +1,51 @@
 import os
 import pexpect
-from rich import print
+from utils import Logger
+
+logger = Logger.get_logger(__name__)
+
 
 def install_update_game(
     steamcmd_path: str, game_path: str, appid: str, validate: bool = False
 ):
+    """
+    Install or update a game using SteamCMD.
+
+    Args:
+        steamcmd_path (str): The path to the SteamCMD executable.
+        game_path (str): The path where the game will be installed or updated.
+        appid (str): The Steam AppID of the game.
+        validate (bool, optional): If True, validate files after installation. Defaults to False.
+
+    Raises:
+        ValueError: If steamcmd.sh is not found or not executable.
+        PermissionError: If permission is denied while creating the game folder.
+        ValueError: If the game folder is not writeable.
+        RuntimeError: If the installation process fails.
+
+    Returns:
+        None
+    """
     # Check steamcmd command available
     steamcmd_sh = os.path.join(steamcmd_path, "steamcmd.sh")
     if not os.access(steamcmd_sh, os.X_OK):
-        print(f"[red]Steamcmd {steamcmd_path} not found / not executable[/red]")
+        logger.error("[red]Steamcmd %s not found / not executable[/]", steamcmd_path)
         raise ValueError("steamcmd.sh not found or not executable")
 
     # Attempt to create folder
     try:
         os.makedirs(game_path, exist_ok=True)
     except PermissionError:
-        print(f"[red]Failed to create {game_path} folder, permission denied.[/red]")
+        logger.error(
+            "[red]Failed to create %s folder, permission denied.[/]", game_path
+        )
         raise
 
     # Ensure folder is writeable
     if os.access(game_path, os.W_OK):
-        print(f"[green]Folder {game_path} is writeable[/green]")
+        logger.info("[green]Folder %s is writeable[/]", game_path)
     else:
-        print(f"[red]Folder {game_path} is not writeable[/red]")
+        logger.error("[red]Folder %s is not writeable[/]", game_path)
         raise ValueError(f"Could not write into {game_path} directory")
 
     # Install / update steamcmd
@@ -39,12 +62,12 @@ def install_update_game(
     )
 
     steamcmd = pexpect.spawn(cmdline)
-    print(f"$ {cmdline}")
+    logger.info("$ %s", cmdline)
     while True:
         try:
             steamcmd.expect("\r\n")
             line = steamcmd.before.decode("utf-8")
-            print(f">>> {line}")
+            logger.info(">>> %s", line)
         except KeyboardInterrupt:
             steamcmd.close(force=True)
         except pexpect.EOF:
@@ -53,7 +76,7 @@ def install_update_game(
     res = steamcmd.wait()
 
     if res == 0:
-        print(f"[green]App {appid} successfully installed![/green]")
+        logger.info("[green]App %s successfully installed![/]", appid)
     else:
-        print(f"[red]Failed to install app {appid}. Error: {res}[/red]")
+        logger.error("[red]Failed to install app %s. Error: %s[/]", appid, res)
         raise RuntimeError("Failed to install game")

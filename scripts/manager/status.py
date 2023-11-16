@@ -1,17 +1,27 @@
 import os
+from typing import Optional
+
 import psutil
 import requests
-import subprocess
-import json
-from typing import Optional
-from rich import print
-from ark_rcon import playercount
 
+from ark_rcon import playercount
 from config import get_port
 from eos import get_eos_credentials
+from utils import Logger
+
+logger = Logger.get_logger(__name__)
 
 
 def is_server_running(config: dict) -> Optional[int]:
+    """
+    Check if the server is running by reading the process ID (PID) from the PID file.
+
+    Args:
+        config (dict): The configuration settings, including the path to the PID file.
+
+    Returns:
+        Optional[int]: The PID of the running server process if it is found, else None.
+    """
     # Get PID from file
     pid_file = config["ark"]["advanced"]["pid_file"]
     with open(pid_file, "r", encoding="utf-8") as f:
@@ -27,20 +37,41 @@ def is_server_running(config: dict) -> Optional[int]:
 
 
 def store_pid(config: dict, pid: int):
+    """
+    Store the process ID (PID) of the running server in the PID file.
+
+    Args:
+        config (dict): The configuration settings, including the path to the PID file.
+        pid (int): The process ID to be stored.
+    """
     # Save PID / PGID
     with open(config["ark"]["advanced"]["pid_file"], "w", encoding="utf-8") as f:
         f.write(f"{pid}")
 
 
 def clear_pid(config: dict):
+    """
+    Clear the stored process ID (PID) in the PID file.
+
+    Args:
+        config (dict): The configuration settings, including the path to the PID file.
+    """
     # Save PID / PGID
     with open(config["ark"]["advanced"]["pid_file"], "w", encoding="utf-8") as f:
         f.write("")
 
 
 def get_real_server_port(config: dict, server_pid: int) -> Optional[int]:
-    # Get real port by filtering on the process name == GameThread and
-    # the pgid == server_pid
+    """
+    Get the real server port by filtering on the process name (GameThread) and the process group ID (PGID).
+
+    Args:
+        config (dict): The configuration settings.
+        server_pid (int): The process ID (PID) of the running server.
+
+    Returns:
+        Optional[int]: The port number of the server if found, else None.
+    """
     for conn in psutil.net_connections(kind="udp"):
         # Some connections have unknown pid
         if conn.pid is None:
@@ -52,12 +83,23 @@ def get_real_server_port(config: dict, server_pid: int) -> Optional[int]:
             if p.name() == "GameThread":
                 return conn.laddr.port
             else:
-                print("[red]Found matching PGID, but invalid name.[/red]")
+                logger.error("[red]Found matching PGID, but invalid name.[/]")
 
     return None
 
 
 def server_full_status(config: dict, eos_config: dict, server_port: int):
+    """
+    Check and display detailed information about the Ark server's status using EOS (Epic Online Services).
+
+    Args:
+        config (dict): The configuration settings.
+        eos_config (dict): The EOS configuration settings, including DedicatedServerClientToken and DeploymentId.
+        server_port (int): The port number of the Ark server.
+
+    Returns:
+        None
+    """
     creds = eos_config["DedicatedServerClientToken"]
     deploy_id = eos_config["DeploymentId"]
 
@@ -78,7 +120,9 @@ def server_full_status(config: dict, eos_config: dict, server_port: int):
     resp_json = oauth_response.json()
     # If there is an error or no access token
     if "errorCode" in resp_json or "access_token" not in resp_json:
-        print("[red]Failed to get oauth token... Please run the command again.[/red]")
+        logger.error(
+            "[red]Failed to get oauth token... Please run the command again.[/]"
+        )
         return
 
     token = resp_json["access_token"]
@@ -105,7 +149,9 @@ def server_full_status(config: dict, eos_config: dict, server_port: int):
 
     # Check for errors
     if "errorCode" in resp_json or "sessions" not in resp_json:
-        print("[red]Failed to query server list... Please run the command again.[/red]")
+        logger.error(
+            "[red]Failed to query server list... Please run the command again.[/]"
+        )
         return
 
     # Extract correct server based on server port
@@ -118,7 +164,7 @@ def server_full_status(config: dict, eos_config: dict, server_port: int):
         None,
     )
     if serv is None:
-        print("[red]Server is down.[/red]")
+        logger.warning("[yellow]Server is down.[/]")
         return
 
     # Extract server details
@@ -142,22 +188,33 @@ def server_full_status(config: dict, eos_config: dict, server_port: int):
     if mods == "":
         mods = "-"
 
-    print(f"Server Name     {serv_name}")
-    print(f"Map             {map_name}")
-    print(f"Day             {day}")
-    print(f"Players         {curr_players} / {max_players}")
-    print(f"Mods            {mods}")
-    print(f"BattlEye        {battleye}")
-    print(f"PVE             {pve}")
-    print(f"Server Version  {major}.{minor}")
-    print(f"Server Address  {ip}:{bind_port}")
-    print("[green]Server is up.[/green]")
+    logger.info("Server Name     %s", serv_name)
+    logger.info("Map             %s", map_name)
+    logger.info("Day             %s", day)
+    logger.info("Players         %s / %s", curr_players, max_players)
+    logger.info("Mods            %s", mods)
+    logger.info("BattlEye        %s", battleye)
+    logger.info("PVE             %s", pve)
+    logger.info("Server Version  %s.%s", major, minor)
+    logger.info("Server Address  %s:%s", ip, bind_port)
+    logger.info("[green]Server is up![/]")
 
 
 def server_status(config: dict, full: bool = False, **kwargs: any):
+    """
+    Check and display the status of the Ark server.
+
+    Args:
+        config (dict): The configuration settings.
+        full (bool, optional): If True, display detailed server information. Defaults to False.
+        **kwargs: Additional keyword arguments.
+
+    Returns:
+        None
+    """
     pid = is_server_running(config)
     if pid is None:
-        print("[red]Server is not running.[/red]")
+        logger.warning("[yellow]Server is not running.[/]")
         return
 
     # Load EOS credentials for full status
@@ -166,27 +223,29 @@ def server_status(config: dict, full: bool = False, **kwargs: any):
     else:
         creds = None
 
-    print(f"Server PID      {pid}")
-    
+    logger.info("Server PID      %s", pid)
+
     # Check server port
     server_port = get_port(config)
     l_port = get_real_server_port(config, pid)
     if l_port is None:
-        print("[red]Server is not listening.[/red]")
+        logger.warning("[yellow]Server is not listening.[/]")
         return
     elif l_port != server_port:
-        print(f"[red]Server listening on port {l_port} instead of {server_port}.[/red]")
+        logger.error(
+            "[red]Server listening on port %s instead of %s.[/]", l_port, server_port
+        )
         return
 
-    print(f"Server Port     {server_port}")
-    
+    logger.info("Server Port     %s", server_port)
+
     n_players = playercount(config, fastcrash=True)
     if n_players is None:
-        print("[red]Server is down.[/red]")
+        logger.warning("[yellow]Server is down.[/]")
         return
 
     if creds:
         server_full_status(config, eos_config=creds, server_port=server_port)
-    else:        
-        print(f"Players         {n_players} / ?")
-        print("[green]Server is up.[/green]")
+    else:
+        logger.info("Players         %s / ?", n_players)
+        logger.info("[green]Server is up![/]")

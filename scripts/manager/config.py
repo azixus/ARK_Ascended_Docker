@@ -127,11 +127,6 @@ def get_cmdline_args(config: dict) -> tuple[str, list, list]:
     opts_args = get_ark_args_opts(ark_config)
 
     main_str = "".join(main_args)
-    flags_str = " ".join(flags_args)
-    opts_str = " ".join(opts_args)
-    cmdline = f"{map_name}{main_str} {flags_str} {opts_str}"
-
-    cmdline = [f"{map_name}{main_str}", flags_str, opts_str]
 
     return f"{map_name}{main_str}", flags_args, opts_args
 
@@ -185,8 +180,8 @@ def get_rcon_enabled(config: dict) -> bool:
     return rcon
 
 
-def get_rcon_port(config: dict) -> int:
-    port = -1
+def get_rcon_port(config: dict) -> Optional[int]:
+    port = None
 
     if get_rcon_enabled(config):
         try:
@@ -204,7 +199,7 @@ def get_rcon_port(config: dict) -> int:
     return port
 
 
-def get_admin_password(config: dict) -> str:
+def get_admin_password(config: dict) -> Optional[str]:
     password = None
 
     try:
