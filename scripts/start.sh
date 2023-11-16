@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #exit on error
-set -ex
+set -e
 
 # Create steam directory and set environment variables
 mkdir -p "${STEAM_COMPAT_DATA_PATH}"
