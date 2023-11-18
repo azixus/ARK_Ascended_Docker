@@ -1,9 +1,19 @@
 #!/bin/python3
 import argparse
 
+# Python 3.11+ compatible import
+try:
+    import tomllib
+except ModuleNotFoundError:
+    import tomli as tomllib
+
 from server import start, stop, restart, update
 from status import server_status
 from config import get_config
+from utils import Logger
+
+logger = Logger.get_logger(__name__)
+
 
 def main():
     # Initializes common parser arguments, e.g. start/restart,
@@ -127,7 +137,13 @@ def main():
     # Parse args
     args = top_actions_parser.parse_args()
     args_dict = vars(args)
-    config = get_config(args.config)
+    try:
+        config = get_config(args.config)
+    except tomllib.TOMLDecodeError as e:
+        logger.error("[red]Failed to parse configuration file: %s.[/]", e)
+    except FileNotFoundError:
+        logger.error("[red]File %s not found.[/]", args.config)
+
     args_dict["config"] = config
 
     actions = {

@@ -120,6 +120,7 @@ def server_full_status(config: dict, eos_config: dict, server_port: int):
     resp_json = oauth_response.json()
     # If there is an error or no access token
     if "errorCode" in resp_json or "access_token" not in resp_json:
+        logger.debug("EOS API error while requesting oauth token: %s", resp_json)
         logger.error(
             "[red]Failed to get oauth token... Please run the command again.[/]"
         )
@@ -146,6 +147,7 @@ def server_full_status(config: dict, eos_config: dict, server_port: int):
         timeout=10,
     )
     resp_json = filter_response.json()
+    logger.debug("Server list from EOS: %s", resp_json)
 
     # Check for errors
     if "errorCode" in resp_json or "sessions" not in resp_json:
@@ -164,7 +166,7 @@ def server_full_status(config: dict, eos_config: dict, server_port: int):
         None,
     )
     if serv is None:
-        logger.warning("[yellow]Server is down.[/]")
+        logger.warning("[yellow]Server is not available in the server list.[/]")
         return
 
     # Extract server details

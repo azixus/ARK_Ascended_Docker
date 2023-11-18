@@ -46,6 +46,8 @@ AutoSavePeriodMinutes = 15
 # Can probably keep that in external file
 [ark.config.Game."/script/shootergame/shootergamemode"]
 MaxDifficulty = true
+# To set a value multiple times in ARK's ini file, use an array, e.g., 
+# OverridePlayerLevelEngramPoints=[5, 10, 15]
 
 # Backup configuration settings
 [ark.backup]
@@ -55,12 +57,13 @@ max_backup_number = "100"              # Number of backup to store. 0 for unlimi
 
 # How to execute the ARK Ascended Server
 [ark.exec]
-start_type = "LINUX_PROTON" # LINUX_NATIVE / WINDOWS_NATIVE
+start_type = "LINUX_PROTON" # LINUX_NATIVE
 
 # Static settings
 [ark.advanced]
 pid_file = "/opt/arkserver/.server.pid"
 log_file = "/opt/arkserver/ShooterGame/Saved/Logs/ShooterGame.log"
+ini_dir = "/opt/arkserver/ShooterGame/Saved/Config/WindowsServer"
 manager_log_file = "/opt/arkserver/manager.log"
 eos_file = "/opt/manager/.eos.conf"
 pdb-sym2addr_dl = "https://github.com/azixus/pdb-sym2addr-rs/releases/latest/download/pdb-sym2addr-x86_64-unknown-linux-musl.tar.gz"

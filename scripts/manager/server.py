@@ -3,7 +3,7 @@ import os
 import subprocess
 import psutil
 
-from config import get_cmdline_args, get_port, get_server_binary
+from config import get_cmdline_args, get_port, get_server_binary, build_ini_file
 from steamcmd import install_update_game
 from status import is_server_running, store_pid, clear_pid, get_real_server_port
 from utils import Logger
@@ -108,7 +108,9 @@ def start(
     if not no_autoupdate:
         update(config, start_on_success=False)
 
-    # todo: Load ini files
+    # Set GameUserSettings.ini and Game.ini
+    build_ini_file(config, "GameUserSettings")
+    build_ini_file(config, "Game")
 
     # Clean to support other starts than proton
     if config["ark"]["exec"]["start_type"] == "LINUX_PROTON":

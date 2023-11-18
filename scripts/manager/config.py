@@ -1,3 +1,4 @@
+import re
 import os
 from typing import Optional
 
@@ -6,6 +7,10 @@ try:
     import tomllib
 except ModuleNotFoundError:
     import tomli as tomllib
+
+from utils import Logger
+
+logger = Logger.get_logger(__name__)
 
 
 def get_ark_args_main(ark_config: dict) -> list:
@@ -129,6 +134,62 @@ def get_cmdline_args(config: dict) -> tuple[str, list, list]:
     main_str = "".join(main_args)
 
     return f"{map_name}{main_str}", flags_args, opts_args
+
+
+def build_ini_file(config: dict, name: str):
+    ini_dir = config["ark"]["advanced"]["ini_dir"]
+    config_file = os.path.join(ini_dir, f"{name}.ini")
+    if not os.path.exists(config_file):
+        logger.warning("[yellow]Ini file %s not found.[/]", config_file)
+
+    # Load config, or return
+    custom_config = config["ark"]["config"].get(name, None)
+    if not custom_config:
+        logger.warning("[yellow]No custom settings for %s found.[/]", config_file)
+        return
+
+    with open(config_file, "r", encoding="utf-8") as ini_file:
+        ini_content = ini_file.read().strip()
+
+    # Since Unreal Engine's configuration files are so damn weird, we only
+    # use regex here instead of a proper parser.
+    for section, settings in custom_config.items():
+        # Select section regex
+        section_regex = rf"\[{section}\](?:.*?)(?=(?:\[[^\n]+\])|$)"
+        res = re.search(section_regex, ini_content, re.DOTALL)
+        if res:
+            section_content = res.group(0).strip()
+        else:
+            section_content = f"[{section}]"
+
+        # Add key=val pairs to section_content
+        for key, val in settings.items():
+            # Duplicate variable n time if it is a list
+            if isinstance(val, list):
+                keyval = "\n".join([f"{key}={v}" for v in val])
+            else:
+                keyval = f"{key}={val}"
+
+            logger.debug("In %s.%s, setting %s", name, section, keyval)
+
+            # Replace key if it already exists, otherwise add it
+            key_regex = rf"^{key} *=.*$"
+            res = re.search(key_regex, section_content, re.MULTILINE)
+            if res:
+                section_content = section_content.replace(res.group(0), keyval)
+            else:
+                section_content += f"\n{keyval}"
+
+        # Replace section if it already exists in original file, otherwise add it
+        res = re.search(section_regex, ini_content, re.DOTALL)
+        if res:
+            ini_content = ini_content.replace(res.group(0), section_content + "\n")
+        else:
+            ini_content += f"\n\n{section_content}\n"
+
+    # Save new ini file
+    with open(config_file, "w", encoding="utf-8") as ini_file:
+        ini_file.write(ini_content.strip())
 
 
 def get_config(path: str) -> dict:
