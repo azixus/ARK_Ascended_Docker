@@ -7,6 +7,7 @@ try:
     import tomllib
 except ModuleNotFoundError:
     import tomli as tomllib
+import tomli_w
 
 from utils import Logger
 
@@ -136,27 +137,15 @@ def get_cmdline_args(config: dict) -> tuple[str, list, list]:
     return f"{map_name}{main_str}", flags_args, opts_args
 
 
-def build_ini_file(config: dict, name: str):
-    ini_dir = config["ark"]["advanced"]["ini_dir"]
-    config_file = os.path.join(ini_dir, f"{name}.ini")
-    if not os.path.exists(config_file):
-        logger.warning("[yellow]Ini file %s not found.[/]", config_file)
-
-    # Load config, or return
-    custom_config = config["ark"]["config"].get(name, None)
-    if not custom_config:
-        logger.warning("[yellow]No custom settings for %s found.[/]", config_file)
-        return
-
-    with open(config_file, "r", encoding="utf-8") as ini_file:
-        ini_content = ini_file.read().strip()
-
+def update_ini_file(
+    ini_config: dict, ini_name: str, ini_content: str, delete_only: bool = False
+) -> str:
     # Since Unreal Engine's configuration files are so damn weird, we only
     # use regex here instead of a proper parser.
-    for section, settings in custom_config.items():
+    for section, settings in ini_config.items():
         # Select section regex
         section_regex = rf"\[{section}\](?:.*?)(?=(?:\[[^\n]+\])|$)"
-        res = re.search(section_regex, ini_content, re.DOTALL)
+        res = re.search(section_regex, ini_content, re.DOTALL | re.IGNORECASE)
         if res:
             section_content = res.group(0).strip()
         else:
@@ -170,26 +159,82 @@ def build_ini_file(config: dict, name: str):
             else:
                 keyval = f"{key}={val}"
 
-            logger.debug("In %s.%s, setting %s", name, section, keyval)
+            if not delete_only:
+                logger.debug("In %s.%s, setting %s", ini_name, section, keyval)
+            else:
+                logger.debug("In %s.%s, Removing %s", ini_name, section, keyval)
 
             # Replace key if it already exists, otherwise add it
-            key_regex = rf"^{key} *=.*$"
-            res = re.search(key_regex, section_content, re.MULTILINE)
-            if res:
-                section_content = section_content.replace(res.group(0), keyval)
+            key_regex = rf"\n^{key} *=.*$"
+            res = re.findall(key_regex, section_content, re.MULTILINE | re.IGNORECASE)
+            # No match, simply add line
+            if len(res) == 0:
+                if not delete_only:
+                    section_content += f"\n{keyval}"
             else:
-                section_content += f"\n{keyval}"
+                if not delete_only:
+                    # Replace first occurence of the group
+                    section_content = section_content.replace(res[0], f"\n{keyval}", 1)
+                else:
+                    section_content = section_content.replace(res[0], "", 1)
 
-        # Replace section if it already exists in original file, otherwise add it
+                # If there are any other occurence, remove them
+                for m in res[1:]:
+                    section_content = section_content.replace(m, "", 1)
+
         res = re.search(section_regex, ini_content, re.DOTALL)
         if res:
             ini_content = ini_content.replace(res.group(0), section_content + "\n")
         else:
             ini_content += f"\n\n{section_content}\n"
 
+    return ini_content
+
+
+def build_ini_file(config: dict, name: str):
+    ini_dir = config["ark"]["advanced"]["ini_dir"]
+    config_file = os.path.join(ini_dir, f"{name}.ini")
+    if not os.path.exists(config_file):
+        logger.warning("[yellow]Ini file %s not found.[/]", config_file)
+
+    # Load config, or return
+    custom_ini_config = config["ark"]["config"].get(name, None)
+    if not custom_ini_config:
+        logger.warning("[yellow]No custom settings for %s found.[/]", config_file)
+        return
+
+    with open(config_file, "r", encoding="utf-8") as ini_file:
+        ini_content = ini_file.read().strip()
+
+    # Check previously loaded config and remove unspecified options
+    prev_ini_config_file = config["ark"]["advanced"]["prev_ini_config"]
+    prev_ini_config = {}
+    prev_ini_config[name] = {}
+    try:
+        with open(prev_ini_config_file, "rb") as f:
+            prev_ini_config.update(tomllib.load(f))
+
+        ini_content = update_ini_file(
+            prev_ini_config[name], name, ini_content, delete_only=True
+        )
+    except FileNotFoundError:
+        logger.debug("Previous ini configuration not found.")
+
+    # Update ini config
+    ini_content = update_ini_file(
+        custom_ini_config, name, ini_content, delete_only=False
+    )
+
     # Save new ini file
     with open(config_file, "w", encoding="utf-8") as ini_file:
         ini_file.write(ini_content.strip())
+
+    # Backup updated config
+    if name not in prev_ini_config:
+        prev_ini_config[name] = {}
+    prev_ini_config[name].update(custom_ini_config)
+    with open(prev_ini_config_file, "wb") as f:
+        tomli_w.dump(prev_ini_config, f)
 
 
 def get_config(path: str) -> dict:
