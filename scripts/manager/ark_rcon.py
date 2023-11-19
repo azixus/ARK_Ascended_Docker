@@ -42,8 +42,22 @@ def send(
     return response
 
 
+def echo_send(
+    config: dict,
+    command: str,
+    address: str = "127.0.0.1",
+    fastcrash: bool = False,
+    **kwargs: any,
+):
+    res = send(config=config, command=command, address=address, fastcrash=fastcrash)
+    logger.info("Result: %s", res)
+
+
 def saveworld(
-    config: dict, address: str = "127.0.0.1", fastcrash: bool = False
+    config: dict,
+    address: str = "127.0.0.1",
+    fastcrash: bool = False,
+    **kwargs: any,
 ) -> bool:
     """
     Save the world by sending an RCON request to the server.

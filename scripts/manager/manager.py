@@ -11,6 +11,7 @@ from server import start, stop, restart, update
 from status import server_status
 from config import get_config
 from utils import Logger
+from ark_rcon import echo_send
 
 logger = Logger.get_logger(__name__)
 
@@ -116,9 +117,24 @@ def main():
         description="Updates the server to the newest available version",
         help="updates the server",
     )
-    # start_on_success: bool = False,
-    # force: bool = False,
-    # saveworld: bool = True,
+    update_parser.add_argument(
+        "--no-autostart",
+        action="store_true",
+        required=False,
+        help="Do not automatically restart the server upon successful update",
+    )
+    update_parser.add_argument(
+        "--force",
+        action="store_true",
+        required=False,
+        help="Stop the server without requesting user input",
+    )
+    update_parser.add_argument(
+        "--saveworld",
+        action="store_true",
+        required=False,
+        help="Saves the world before updating the server",
+    )
 
     status_parser = actions_parser.add_parser(
         name="status",
@@ -132,6 +148,31 @@ def main():
         action="store_true",
         required=False,
         help="Queries the EOS API to obtain additional status information",
+    )
+
+    rcon_parser = actions_parser.add_parser(
+        name="rcon",
+        parents=[generic_parser],
+        add_help=False,
+        description="Sends an rcon command to the server",
+        help="sends an rcon command",
+    )
+    rcon_parser.add_argument(
+        "command",
+        type=str,
+        help="Command to send to the RCON server",
+    )
+    rcon_parser.add_argument(
+        "-i",
+        "--ip",
+        required=False,
+        help="IP address of the RCON server, 127.0.0.1 by default",
+    )
+    rcon_parser.add_argument(
+        "-p",
+        "--port",
+        required=False,
+        help="Port of the RCON server, specified in config.toml by default",
     )
 
     # Parse args
@@ -154,6 +195,7 @@ def main():
         "stop": stop,
         "update": update,
         "status": server_status,
+        "rcon": echo_send,
     }
     actions[args.action](**args_dict)
 

@@ -14,7 +14,7 @@ logger = Logger.get_logger(__name__)
 
 def update(
     config: dict,
-    start_on_success: bool = False,
+    no_autostart: bool = False,
     force: bool = False,
     saveworld: bool = False,
     **kwargs: any,
@@ -60,8 +60,8 @@ def update(
     logger.info("[green]Server updated![/]")
     logger.debug("-------UPDATE DONE-------")
 
-    # Start the game if requested
-    if start_on_success:
+    # Start the game unless disabled
+    if not no_autostart:
         start(config, no_autoupdate=True)
 
 
