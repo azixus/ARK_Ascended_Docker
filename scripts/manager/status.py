@@ -88,6 +88,19 @@ def get_real_server_port(config: dict, server_pid: int) -> Optional[int]:
     return None
 
 
+def get_mod_name(modid: str) -> str:
+    url = f"https://api.cfwidget.com/{modid}"
+    try:
+        resp = requests.get(
+            url,
+            timeout=2,
+        )
+        resp_json = resp.json()
+        return f"{resp_json.get('title', modid)} ({modid})"
+    except TimeoutError:
+        return modid
+
+
 def server_full_status(config: dict, eos_config: dict, server_port: int):
     """
     Check and display detailed information about the Ark server's status using EOS (Epic Online Services).
@@ -189,6 +202,9 @@ def server_full_status(config: dict, eos_config: dict, server_port: int):
 
     if mods == "":
         mods = "-"
+    else:
+        mod_names = [get_mod_name(mod) for mod in mods.split(",")]
+        mods = ", ".join(mod_names)
 
     logger.info("Server Name     %s", serv_name)
     logger.info("Map             %s", map_name)

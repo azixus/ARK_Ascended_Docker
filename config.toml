@@ -36,8 +36,8 @@ AllowRaidDinoFeeding = true
 WinLiveMaxPlayers = 20
 
 # Mods: Please provide a comma seperated list of the curse-forge modIDs and uncomment the MODS arg
-# e.g. MODS=931872,931338
-# MODS=
+# e.g. MODS="931872,931338"
+MODS="929420,928501"
 
 # Can probably keep that in external file
 [ark.config.GameUserSettings.ServerSettings]

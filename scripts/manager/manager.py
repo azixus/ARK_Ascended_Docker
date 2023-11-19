@@ -141,8 +141,10 @@ def main():
         config = get_config(args.config)
     except tomllib.TOMLDecodeError as e:
         logger.error("[red]Failed to parse configuration file: %s.[/]", e)
+        return
     except FileNotFoundError:
         logger.error("[red]File %s not found.[/]", args.config)
+        return
 
     args_dict["config"] = config
 
