@@ -37,7 +37,7 @@ WinLiveMaxPlayers = 20
 
 # Mods: Please provide a comma seperated list of the curse-forge modIDs and uncomment the MODS arg
 # e.g. MODS="931872,931338"
-MODS="929420,928501"
+MODS = "929420,928501"
 
 # Can probably keep that in external file
 [ark.config.GameUserSettings.ServerSettings]
@@ -56,8 +56,24 @@ MaxDifficulty = true
 # Backup configuration settings
 [ark.backup]
 target_dir = "/var/backups/asa-server"
-max_backup_size = "500MB"              # Size in B, MB, GB. 0 for unlimited.
-max_backup_number = "100"              # Number of backup to store. 0 for unlimited.
+max_backup_size = "500M" # Size in B, M (for MiB), G for (GiB). 0 for unlimited.
+max_backup_number = 10 # Number of backup to store. 0 for unlimited.
+files = [
+    { folder = 'ShooterGame/Saved/SavedArks/TheIsland_WP/', files_regex = [
+        # MapName.ark - prevents copying MapName_01.01.2000_01.01.01
+        '^\w+(?!_\d{2}\.\d{2}\.\d{4}_\d{2}\.\d{2}\.\d{2})\.ark$',
+        '^.+_AntiCorruptionBackup.bak$',
+        '^.+\.arkprofile$',
+        '^.+\.profilebak$',
+        '^.+\.arktribe$',
+        '^.+\.tribebak$',
+    ] },
+    { folder = 'ShooterGame/Saved/Config/WindowsServer', files_regex = [
+        '^GameUserSettings\.ini$',
+        '^Game\.ini$',
+    ] },
+    # Add any folder and corresponding file regex to save
+]
 
 # How to execute the ARK Ascended Server
 [ark.exec]
@@ -67,8 +83,8 @@ start_type = "LINUX_PROTON" # LINUX_NATIVE
 [ark.advanced]
 pid_file = "/opt/arkserver/.server.pid"
 log_file = "/opt/arkserver/ShooterGame/Saved/Logs/ShooterGame.log"
-ini_dir = "/opt/arkserver/ShooterGame/Saved/Config/WindowsServer"
 manager_log_file = "/opt/arkserver/manager.log"
+ini_rel_dir = "ShooterGame/Saved/Config/WindowsServer"
 eos_file = "/opt/manager/.eos.conf"
 prev_ini_config = "./.prev_ini_config.toml"
 pdb-sym2addr_dl = "https://github.com/azixus/pdb-sym2addr-rs/releases/latest/download/pdb-sym2addr-x86_64-unknown-linux-musl.tar.gz"

@@ -12,6 +12,7 @@ from status import server_status
 from config import get_config
 from utils import Logger
 from ark_rcon import echo_send
+from backup import backup, restore
 
 logger = Logger.get_logger(__name__)
 
@@ -175,6 +176,42 @@ def main():
         help="Port of the RCON server, specified in config.toml by default",
     )
 
+    backup_parser = actions_parser.add_parser(
+        name="backup",
+        parents=[generic_parser],
+        add_help=False,
+        description="Take a backup of the server files",
+        help="backup the server",
+    )
+    backup_parser.add_argument(
+        "--compression-level",
+        required=False,
+        default=6,
+        help="Compression level for the tar compression"
+    )
+
+    restore_parser = actions_parser.add_parser(
+        name="restore",
+        parents=[generic_parser],
+        add_help=False,
+        description="Interactively restore a backup of the server files",
+        help="restore a backup",
+    )
+    latest_path = restore_parser.add_mutually_exclusive_group()
+    latest_path.add_argument(
+        "--latest",
+        action="store_true",
+        required=False,
+        help="Restore the latest backup",
+    )
+    latest_path.add_argument(
+        "-p",
+        "--path",
+        type=str,
+        required=False,
+        help="Path to the backup to restore",
+    )
+
     # Parse args
     args = top_actions_parser.parse_args()
     args_dict = vars(args)
@@ -196,6 +233,8 @@ def main():
         "update": update,
         "status": server_status,
         "rcon": echo_send,
+        "backup": backup,
+        "restore": restore,
     }
     actions[args.action](**args_dict)
 

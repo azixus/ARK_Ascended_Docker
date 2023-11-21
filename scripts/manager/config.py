@@ -192,7 +192,8 @@ def update_ini_file(
 
 
 def build_ini_file(config: dict, name: str):
-    ini_dir = config["ark"]["advanced"]["ini_dir"]
+    server_folder = config["ark"]["install_folder"]
+    ini_dir = os.path.join(server_folder, config["ark"]["advanced"]["ini_rel_dir"])
     config_file = os.path.join(ini_dir, f"{name}.ini")
     if not os.path.exists(config_file):
         logger.warning("[yellow]Ini file %s not found.[/]", config_file)
