@@ -1,4 +1,3 @@
-import math
 import os
 import re
 import tarfile
@@ -6,25 +5,10 @@ import time
 from datetime import datetime
 from glob import glob
 from ark_rcon import saveworld
-from utils import Logger
+from utils import Logger, human_size_to_bytes, bytes_to_human_size
 from status import is_server_running
 
 logger = Logger.get_logger(__name__)
-
-
-def human_size_to_bytes(size):
-    size_name = ("B", "K", "M", "G", "T", "P")
-    num, unit = int(size[:-1]), size[-1]
-    idx = size_name.index(unit)
-    factor = 1024**idx
-    return num * factor
-
-
-def bytes_to_human_size(size):
-    size_name = ("B", "KiB", "MiB", "GiB", "TiB", "PiB")
-    idx = 0 if size == 0 else math.floor(math.log(size, 1024))
-    v = size / 1024**idx
-    return f"{v:3.2f}{size_name[idx]}"
 
 
 def get_backup_size(path: str):
