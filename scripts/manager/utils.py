@@ -1,9 +1,6 @@
 import math
 import os
 import sys
-import time
-
-import ark_rcon
 from custom_logging import Logger
 
 logger = Logger.get_logger(__name__)
@@ -100,29 +97,3 @@ def daemonize() -> int:
     os.dup2(stdout.fileno(), sys.stdout.fileno())
     os.dup2(stderr.fileno(), sys.stderr.fileno())
     return 0
-
-
-def sleep_and_warn(config: dict, warn_config: dict):
-    # Convert human time to seconds
-    warn_config = [
-        {"message": c["message"], "time": human_time_to_seconds(c["time"])}
-        for c in warn_config
-    ]
-    warn_config.sort(key=lambda c: c["time"], reverse=True)
-    time_left = max(c["time"] for c in warn_config)
-
-    # For each warning, sleep a specific amount based on the total time left
-    for warning in warn_config:
-        msg = warning["message"]
-        warn_time = warning["time"]
-        sleep_time = time_left - warn_time
-
-        if sleep_time > 0:
-            logger.info("Sleeping for %s.", seconds_to_human_time(sleep_time))
-            time.sleep(sleep_time)
-            time_left -= sleep_time
-
-        ark_rcon.broadcast(config, msg)
-
-    logger.info("Sleeping for %s.", seconds_to_human_time(time_left))
-    time.sleep(time_left)

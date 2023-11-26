@@ -1,5 +1,4 @@
 import os
-from enum import Enum
 from typing import Optional
 
 import psutil
@@ -11,34 +10,6 @@ from eos import get_eos_credentials
 from custom_logging import Logger
 
 logger = Logger.get_logger(__name__)
-
-
-class ScheduledAction(Enum):
-    NONE = 1
-    RESTARTING = 10
-    STOPPING = 20
-    UPDATING = 30
-
-
-def get_scheduled_action(config: dict) -> ScheduledAction:
-    with open(config["ark"]["advanced"]["schedule_file"], "r", encoding="utf-8") as f:
-        action_str = f.read()
-        try:
-            action = ScheduledAction(int(action_str))
-            logger.debug("Current scheduled action: %s (%s)", action.name, action.value)
-            return action
-        except ValueError:
-            logger.debug(
-                "Cannot convert scheduled action '%s'. Assuming NONE.", action_str
-            )
-            return ScheduledAction.NONE
-
-
-def set_scheduled_action(config: dict, action: ScheduledAction):
-    logger.debug("Setting scheduled action to %s (%s)", action.name, action.value)
-
-    with open(config["ark"]["advanced"]["schedule_file"], "w", encoding="utf-8") as f:
-        f.write(f"{action.value}")
 
 
 def is_server_running(config: dict) -> Optional[int]:
