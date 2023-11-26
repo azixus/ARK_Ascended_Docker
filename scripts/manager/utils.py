@@ -1,51 +1,22 @@
-import logging
-import re
 import math
-from rich.logging import RichHandler
+import os
+import sys
+import time
 
+import ark_rcon
+from custom_logging import Logger
 
-class MarkupFormatter(logging.Formatter):
-    """Formatter that removes console markup"""
-
-    @staticmethod
-    def _filter(s):
-        return re.sub(r"\[.*?\]", r"", s)
-
-    def format(self, record):
-        original = super().format(record)
-        return self._filter(original)
-
-
-class Logger:
-    _log_file = "./manager.log"
-
-    @classmethod
-    def get_logger(cls, name: str):
-        """
-        Logger for console and file.
-        """
-        logger = logging.getLogger(name)
-        file_formatter = MarkupFormatter("%(asctime)s | %(levelname)s: %(message)s")
-        rich_formatter = logging.Formatter("%(message)s")
-        logger.setLevel(logging.DEBUG)
-
-        console_handler = RichHandler(show_time=False, show_level=False, markup=True)
-        console_handler.setLevel(logging.INFO)
-        console_handler.setFormatter(rich_formatter)
-        logger.addHandler(console_handler)
-
-        file_handler = logging.FileHandler(filename=cls._log_file)
-        file_handler.setFormatter(file_formatter)
-        file_handler.setLevel(logging.DEBUG)
-        logger.addHandler(file_handler)
-
-        return logger
+logger = Logger.get_logger(__name__)
 
 
 def human_size_to_bytes(size):
     size_name = ("B", "K", "M", "G", "T", "P")
     num, unit = int(size[:-1]), size[-1]
-    idx = size_name.index(unit)
+    try:
+        idx = size_name.index(unit)
+    except ValueError as e:
+        raise ValueError(f"Invalid size unit {unit}.") from e
+
     factor = 1024**idx
     return num * factor
 
@@ -55,3 +26,103 @@ def bytes_to_human_size(size):
     idx = 0 if size == 0 else math.floor(math.log(size, 1024))
     v = size / 1024**idx
     return f"{v:3.2f}{size_name[idx]}"
+
+
+def human_time_to_seconds(h_time):
+    unit_mult = {"s": 1, "m": 60, "h": 60 * 60, "d": 60 * 60 * 24}
+    num, unit = int(h_time[:-1]), h_time[-1]
+    try:
+        mult = unit_mult[unit]
+    except KeyError as e:
+        raise ValueError(f"Invalid size unit {unit}.") from e
+
+    return num * mult
+
+
+def seconds_to_human_time(seconds):
+    unit_mult = [("s", 1), ("m", 60), ("h", 60 * 60), ("d", 60 * 60 * 24)]
+    prev = seconds
+    prev_unit = unit_mult[0][0]
+    for unit, mult in unit_mult[1:]:
+        curr = seconds / mult
+        if curr < 1:
+            break
+
+        prev = curr
+        prev_unit = unit
+
+    return f"{prev:3.1f}{prev_unit}"
+
+
+def daemonize() -> int:
+    # First fork
+    try:
+        r, w = os.pipe()
+        logger.debug("Forking process.")
+        fork_pid = os.fork()
+    except OSError as e:
+        logger.error("Failed to fork process, err: %s", e)
+        sys.exit(1)
+
+    # As the parent process, show message, get daemon pid and return
+    if fork_pid > 0:
+        logger.debug("Process forked successfully into PID %s.", fork_pid)
+        logger.debug("Reading daemon PID in pipe...")
+        daemon_pid = int(os.fdopen(r).readline().strip())
+        logger.debug("Got daemon PID %s", daemon_pid)
+        return daemon_pid
+
+    # Double fork
+    os.setsid()
+    try:
+        logger.debug("Double-forking process.")
+        fork_pid = os.fork()
+    except OSError as e:
+        logger.error("Failed to fork process, err: %s", e)
+        sys.exit(1)
+
+    # As the parent process, show message and return
+    if fork_pid > 0:
+        logger.debug("Double-forked successfully into PID %s.", fork_pid)
+        logger.debug("Writing grandchild PID to pipe...")
+        os.write(w, f"{fork_pid}\n".encode())
+        logger.debug("Done. Exiting first forked process.")
+        sys.exit(0)
+
+    # Double forked, redirect stdin, stdout, stderr to /dev/null
+    os.setsid()
+    sys.stdout.flush()
+    sys.stderr.flush()
+    stdin = open("/dev/null", "rb")
+    stdout = open("/dev/null", "a+b")
+    stderr = open("/dev/null", "a+b")
+    os.dup2(stdin.fileno(), sys.stdin.fileno())
+    os.dup2(stdout.fileno(), sys.stdout.fileno())
+    os.dup2(stderr.fileno(), sys.stderr.fileno())
+    return 0
+
+
+def sleep_and_warn(config: dict, warn_config: dict):
+    # Convert human time to seconds
+    warn_config = [
+        {"message": c["message"], "time": human_time_to_seconds(c["time"])}
+        for c in warn_config
+    ]
+    warn_config.sort(key=lambda c: c["time"], reverse=True)
+    time_left = max(c["time"] for c in warn_config)
+
+    # For each warning, sleep a specific amount based on the total time left
+    for warning in warn_config:
+        msg = warning["message"]
+        warn_time = warning["time"]
+        sleep_time = time_left - warn_time
+
+        if sleep_time > 0:
+            logger.info("Sleeping for %s.", seconds_to_human_time(sleep_time))
+            time.sleep(sleep_time)
+            time_left -= sleep_time
+
+        ark_rcon.broadcast(config, msg)
+
+    logger.info("Sleeping for %s.", seconds_to_human_time(time_left))
+    time.sleep(time_left)

@@ -9,7 +9,7 @@ except ModuleNotFoundError:
     import tomli as tomllib
 import tomli_w
 
-from utils import Logger
+from custom_logging import Logger
 
 logger = Logger.get_logger(__name__)
 
@@ -334,3 +334,12 @@ def get_server_binary(config: dict) -> Optional[str]:
         return server_exec_path
     else:
         return None
+
+
+def get_sorted_warn_messages(config: dict, type: str) -> Optional[list]:
+    try:
+        messages = config["ark"]["warn"][type]
+    except ValueError:
+        return None
+
+    return sorted(messages, key=lambda m: m["time"])

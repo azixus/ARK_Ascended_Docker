@@ -10,7 +10,7 @@ except ModuleNotFoundError:
 from server import start, stop, restart, update
 from status import server_status
 from config import get_config
-from utils import Logger
+from custom_logging import Logger
 from ark_rcon import echo_send
 from backup import backup, restore
 
@@ -85,6 +85,12 @@ def main():
         description="Restarts the server and puts it into the background",
         help="restarts the server",
     )
+    restart_parser.add_argument(
+        "--warn",
+        action="store_true",
+        required=False,
+        help="Warns any connected players that the server is going down",
+    )
 
     stop_parser = actions_parser.add_parser(
         name="stop",
@@ -98,11 +104,6 @@ def main():
         action="store_true",
         required=False,
         help="Warns any connected players that the server is going down",
-    )
-    stop_parser.add_argument(
-        "--warnreason",
-        required=False,
-        help="Gives a reason for the shutdown. Defaults to maintenance",
     )
     stop_parser.add_argument(
         "--saveworld",
@@ -236,7 +237,12 @@ def main():
         "backup": backup,
         "restore": restore,
     }
-    actions[args.action](**args_dict)
+    try:
+        actions[args.action](**args_dict)
+    except KeyboardInterrupt:
+        pass
+    except Exception as e:
+        logger.exception("Process crashed with exception: %s", e)
 
 
 if __name__ == "__main__":

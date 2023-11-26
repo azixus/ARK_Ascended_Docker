@@ -3,7 +3,7 @@ from typing import Optional
 from rcon.source import Client
 
 from config import get_rcon_port, get_admin_password
-from utils import Logger
+from custom_logging import Logger
 
 logger = Logger.get_logger(__name__)
 
@@ -39,7 +39,7 @@ def send(
     response = client.run(command)
     client.close()
 
-    return response
+    return response.strip()
 
 
 def echo_send(
@@ -139,3 +139,14 @@ def doexit(config: dict, address: str = "127.0.0.1", fastcrash: bool = False):
         return True
     except TimeoutError:
         return False
+
+
+def broadcast(
+    config: dict,
+    message: str,
+    address: str = "127.0.0.1",
+    fastcrash: bool = False,
+    **kwargs: any,
+):
+    command = f"ServerChat {message}"
+    send(config=config, command=command, address=address, fastcrash=fastcrash)

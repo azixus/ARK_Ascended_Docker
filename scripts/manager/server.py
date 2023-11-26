@@ -1,12 +1,21 @@
-import time
 import os
 import subprocess
 import psutil
+import pty
+import time
 
 from config import get_cmdline_args, get_port, get_server_binary, build_ini_file
 from steamcmd import install_update_game
-from status import is_server_running, store_pid, clear_pid, get_real_server_port
-from utils import Logger
+from status import (
+    ScheduledAction,
+    get_scheduled_action,
+    is_server_running,
+    store_pid,
+    clear_pid,
+    get_real_server_port,
+)
+from custom_logging import Logger
+from utils import daemonize, sleep_and_warn
 import ark_rcon
 
 logger = Logger.get_logger(__name__)
@@ -91,22 +100,27 @@ def start(
         # Create directory structure and clean log file
         log_file = config["ark"]["advanced"]["log_file"]
         os.makedirs(os.path.dirname(log_file), exist_ok=True)
-        with open(log_file, "w", encoding="utf-8") as f:
-            f.write("")
+        with open(log_file, "wb") as f:
+            f.write(b"")
 
         # Clean pid file
         pid_file = config["ark"]["advanced"]["pid_file"]
-        with open(pid_file, "w", encoding="utf-8") as f:
-            f.write("")
+        with open(pid_file, "wb") as f:
+            f.write(b"")
+
+        # Clean schedule file
+        schedule_file = config["ark"]["advanced"]["schedule_file"]
+        with open(schedule_file, "wb") as f:
+            f.write(b"")
 
     pid = is_server_running(config)
     if pid:
         logger.warning("[yellow]Server is already running under PID %s[/]", pid)
         return
 
-    # If not set, update the server
+    # If not set, update the server, but do not start automatically
     if not no_autoupdate:
-        update(config, start_on_success=False)
+        update(config, no_autostart=True)
 
     # Set GameUserSettings.ini and Game.ini
     build_ini_file(config, "GameUserSettings")
@@ -149,10 +163,13 @@ def start(
 
     # Start server and store PGID = PID. We use it to kill a group of process
     logger.info("Starting the server with %s", " ".join(start_cmd))
+    # Need to run in a pseudo-tty to prevent ARK from double forking (don't ask me why)
+    m, s = pty.openpty()
     ark_server = subprocess.Popen(
         start_cmd,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
+        stdin=s,
+        stdout=s,
+        stderr=s,
         env=custom_env,
         start_new_session=True,
     )
@@ -165,7 +182,7 @@ def start(
         # Wait and return if process dies early
         ret = ark_server.wait(timeout=5)
         logger.error("[red]Server process died, ret = %s.[/]", ret)
-        logger.debug(list(ark_server.stdout))
+        logger.debug(os.read(m, 10240))
         return
     # Process still alive after timeout, OK
     except subprocess.TimeoutExpired:
@@ -192,6 +209,8 @@ def start(
 
     if not up:
         logger.error("[red]Server still not listening after 5 seconds.[/]")
+        logger.warning("[yellow]Killing server process.[/]")
+        os.killpg(pid, 9)
         return
 
     logger.info(
@@ -205,7 +224,11 @@ def start(
 
 
 def restart(
-    config: dict, saveworld: bool = False, no_autoupdate: bool = False, **kwargs: any
+    config: dict,
+    saveworld: bool = False,
+    no_autoupdate: bool = False,
+    warn: bool = False,
+    **kwargs: any,
 ):
     """
     Restart the ASA server and update it unless no_autoupdate is set.
@@ -225,6 +248,34 @@ def restart(
     if pid is None:
         logger.warning("[yellow]Server is not running.[/]")
         return
+
+    if sche := get_scheduled_action(config) != ScheduledAction.NONE:
+        logger.warning(
+            "[yellow]There is already an action in progress: %s[/]", sche.name
+        )
+        return
+
+    # If warn is requested, read config and run warnings in background
+    if warn:
+        try:
+            warn_config: list = config["ark"]["warn"]["restart"]
+        except KeyError:
+            logger.error("[red]Failed to read warn configuration.[/]")
+            return
+
+        # Daemonize process
+        logger.info("[green]Starting background process to warn players.[/]")
+        daemon_pid = daemonize()
+        if daemon_pid > 0:
+            logger.info(
+                "[green]Background process successfully started as PID %s.[/]",
+                daemon_pid,
+            )
+            return
+
+        # We are now in a background process
+        # Wait and display warning(s)
+        sleep_and_warn(config, warn_config)
 
     stop(config, saveworld=saveworld)
     start(config, no_autoupdate=no_autoupdate)
@@ -283,7 +334,7 @@ def stop(config: dict, saveworld: bool = False, **kwargs: any):
 
     # If DoExit failed / process still lives, kill the process group
     if not clean_shutdown:
-        logger.warning("[yellow]Forcing server shutdown.")
+        logger.warning("[yellow]Forcing server shutdown.[/]")
         os.killpg(pid, 9)
 
     clear_pid(config)

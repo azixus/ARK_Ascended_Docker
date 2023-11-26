@@ -14,7 +14,7 @@ except ModuleNotFoundError:
 import tomli_w
 
 from config import get_server_binary
-from utils import Logger
+from custom_logging import Logger
 
 logger = Logger.get_logger(__name__)
 

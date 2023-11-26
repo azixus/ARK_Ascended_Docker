@@ -1,6 +1,6 @@
 import os
 import pexpect
-from utils import Logger
+from custom_logging import Logger
 
 logger = Logger.get_logger(__name__)
 

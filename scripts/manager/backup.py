@@ -5,7 +5,8 @@ import time
 from datetime import datetime
 from glob import glob
 from ark_rcon import saveworld
-from utils import Logger, human_size_to_bytes, bytes_to_human_size
+from custom_logging import Logger
+from utils import human_size_to_bytes, bytes_to_human_size
 from status import is_server_running
 
 logger = Logger.get_logger(__name__)

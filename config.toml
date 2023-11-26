@@ -35,9 +35,8 @@ ActiveEvent = "Summer"
 AllowRaidDinoFeeding = true
 WinLiveMaxPlayers = 20
 
-# Mods: Please provide a comma seperated list of the curse-forge modIDs and uncomment the MODS arg
-# e.g. MODS="931872,931338"
-MODS = "929420,928501"
+# Mods: Please provide a comma separated list of the curse-forge modIDs
+# e.g. MODS = "931872,931338"
 
 # Can probably keep that in external file
 [ark.config.GameUserSettings.ServerSettings]
@@ -75,6 +74,26 @@ files = [
     # Add any folder and corresponding file regex to save
 ]
 
+# Shutdown/restart/update configuration 
+[ark.warn]
+# You can add custom messages and timeout. The action is executed after waiting
+# for the longest time.
+# Time in h (hours), m (minutes), s (seconds)
+shutdown = [ # Shutdown server after 5 minutes, with a warning at 5 minutes and 1 minute
+    { message = "Server will shutdown in 5 minutes", time="5m" },
+    { message = "Server will shutdown in less than a minute", time="1m" },
+]
+
+restart = [
+    { message = "Server will restart in 5 minutes", time="5m" },
+    { message = "Server will restart in less than a minute", time="'m'" },
+]
+
+update = [
+    { message = "Server will update in 5 minutes", time="5m" },
+    { message = "Server will update in less than a minute", time="1m" },
+]
+
 # How to execute the ARK Ascended Server
 [ark.exec]
 start_type = "LINUX_PROTON" # LINUX_NATIVE
@@ -82,6 +101,7 @@ start_type = "LINUX_PROTON" # LINUX_NATIVE
 # Static settings
 [ark.advanced]
 pid_file = "/opt/arkserver/.server.pid"
+schedule_file = "/opt/arkserver/.scheduled.action"
 log_file = "/opt/arkserver/ShooterGame/Saved/Logs/ShooterGame.log"
 manager_log_file = "/opt/arkserver/manager.log"
 ini_rel_dir = "ShooterGame/Saved/Config/WindowsServer"

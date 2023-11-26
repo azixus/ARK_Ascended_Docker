@@ -5,7 +5,7 @@ set -e
 
 # Start the server and clean logs/pid file. Weird hack with script
 # to allow python to set process group.
-0<&- script -qefc "manager start --clean" /dev/null | cat &
+manager start --clean >/dev/null &
 
 # Register SIGTERM handler to stop server gracefully
 trap "manager stop --saveworld" SIGTERM
