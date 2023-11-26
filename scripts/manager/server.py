@@ -2,6 +2,7 @@ import os
 import subprocess
 import psutil
 import pty
+import sys
 import time
 
 from config import get_cmdline_args, get_port, get_server_binary, build_ini_file
@@ -26,6 +27,7 @@ def update(
     no_autostart: bool = False,
     force: bool = False,
     saveworld: bool = False,
+    warn: bool = False,
     **kwargs: any,
 ):
     """
@@ -43,15 +45,18 @@ def update(
         None
     """
     logger.debug("-------STARTING UPDATE-------")
-    # If server running, ask user unless force is True
+    # If server running, ask user unless force is True or warn is True
     pid = is_server_running(config)
     if pid:
-        logger.warning("[yellow]Server is already running on PID %s[/]", pid)
-        if not force:
+        logger.warning("[yellow]Server is currently running on PID %s.[/]", pid)
+        if not force and not warn:
             # Ask user input, return by default
             choice = input("Would you like to stop the server now? [y/N]: ").lower()
             if choice not in ["y", "yes"]:
                 return
+        # If warn is requested, run warnings in background
+        elif warn:
+            do_warn(config, "update")
 
         stop(config, saveworld=saveworld)
 
@@ -120,7 +125,7 @@ def start(
 
     # If not set, update the server, but do not start automatically
     if not no_autoupdate:
-        update(config, no_autostart=True)
+        update(config, no_autostart=True, warn=False)
 
     # Set GameUserSettings.ini and Game.ini
     build_ini_file(config, "GameUserSettings")
@@ -255,35 +260,17 @@ def restart(
         )
         return
 
-    # If warn is requested, read config and run warnings in background
+    # If warn is requested, run warnings in background
     if warn:
-        try:
-            warn_config: list = config["ark"]["warn"]["restart"]
-        except KeyError:
-            logger.error("[red]Failed to read warn configuration.[/]")
-            return
+        do_warn(config, "restart")
 
-        # Daemonize process
-        logger.info("[green]Starting background process to warn players.[/]")
-        daemon_pid = daemonize()
-        if daemon_pid > 0:
-            logger.info(
-                "[green]Background process successfully started as PID %s.[/]",
-                daemon_pid,
-            )
-            return
-
-        # We are now in a background process
-        # Wait and display warning(s)
-        sleep_and_warn(config, warn_config)
-
-    stop(config, saveworld=saveworld)
+    stop(config, saveworld=saveworld, warn=False)
     start(config, no_autoupdate=no_autoupdate)
 
     logger.debug("-------SERVER RESTARTED-------")
 
 
-def stop(config: dict, saveworld: bool = False, **kwargs: any):
+def stop(config: dict, saveworld: bool = False, warn: bool = False, **kwargs: any):
     """
     Stop the ASA server gracefully or forcefully if it fails.
 
@@ -301,8 +288,12 @@ def stop(config: dict, saveworld: bool = False, **kwargs: any):
         logger.warning("[yellow]Server is not running.[/]")
         return
 
+    # If warn is requested, run warnings in background
+    if warn:
+        do_warn(config, "stop")
+
     if saveworld:
-        logger.debug("Saving world... ", end="")
+        logger.debug("Saving world... ")
         try:
             if ark_rcon.saveworld(config):
                 logger.info("[green]World saved successfully.[/]")
@@ -339,3 +330,25 @@ def stop(config: dict, saveworld: bool = False, **kwargs: any):
 
     clear_pid(config)
     logger.debug("-------SERVER STOPPED-------")
+
+
+def do_warn(config: dict, warn_type: str) -> bool:
+    try:
+        warn_config: list = config["ark"]["warn"][warn_type]
+    except KeyError:
+        logger.error("[red]Failed to read warn configuration.[/]")
+        sys.exit(1)  # Exit process immediately
+
+    # Daemonize process
+    logger.info("[green]Starting background process to warn players.[/]")
+    daemon_pid = daemonize()
+    if daemon_pid > 0:
+        logger.info(
+            "[green]Background process successfully started as PID %s.[/]",
+            daemon_pid,
+        )
+        sys.exit(0)  # Exit process immediately
+
+    # We are now in a background process
+    # Wait and display warning(s)
+    sleep_and_warn(config, warn_config)

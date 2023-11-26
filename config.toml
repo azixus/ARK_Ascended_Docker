@@ -79,19 +79,19 @@ files = [
 # You can add custom messages and timeout. The action is executed after waiting
 # for the longest time.
 # Time in h (hours), m (minutes), s (seconds)
-shutdown = [ # Shutdown server after 5 minutes, with a warning at 5 minutes and 1 minute
-    { message = "Server will shutdown in 5 minutes", time="5m" },
-    { message = "Server will shutdown in less than a minute", time="1m" },
+stop = [ # Shutdown server after 1 minute, with a warning at 5 minute and 5 seconds
+    { message = "Server will shutdown in less than a minute", time = "1m" },
+    { message = "Server is shutting down now", time = "5s" },
 ]
 
 restart = [
-    { message = "Server will restart in 5 minutes", time="5m" },
-    { message = "Server will restart in less than a minute", time="'m'" },
+    { message = "Server will restart in less than a minute", time = "1m" },
+    { message = "Server is restarting now", time = "5s" },
 ]
 
 update = [
-    { message = "Server will update in 5 minutes", time="5m" },
-    { message = "Server will update in less than a minute", time="1m" },
+    { message = "Server will update in less than a minute", time = "1m" },
+    { message = "Server is updating now", time = "5s" },
 ]
 
 # How to execute the ARK Ascended Server

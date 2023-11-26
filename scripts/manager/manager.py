@@ -55,6 +55,16 @@ def main():
     # )
     ### START/RESTART END
 
+    ### WARN
+    warn_parser = argparse.ArgumentParser(add_help=False)
+    warn_parser.add_argument(
+        "--warn",
+        action="store_true",
+        required=False,
+        help="Warns any connected players that the server is going down",
+    )
+    ### WARN END
+
     top_actions_parser = argparse.ArgumentParser(
         prog="manager",
         description="ARK Survival Ascended server manager",
@@ -80,30 +90,18 @@ def main():
 
     restart_parser = actions_parser.add_parser(
         name="restart",
-        parents=[generic_parser, start_restart_parser],
+        parents=[generic_parser, start_restart_parser, warn_parser],
         add_help=False,
         description="Restarts the server and puts it into the background",
         help="restarts the server",
     )
-    restart_parser.add_argument(
-        "--warn",
-        action="store_true",
-        required=False,
-        help="Warns any connected players that the server is going down",
-    )
 
     stop_parser = actions_parser.add_parser(
         name="stop",
-        parents=[generic_parser],
+        parents=[generic_parser, warn_parser],
         add_help=False,
         description="Stops the server if it is running",
         help="stops the server",
-    )
-    stop_parser.add_argument(
-        "--warn",
-        action="store_true",
-        required=False,
-        help="Warns any connected players that the server is going down",
     )
     stop_parser.add_argument(
         "--saveworld",
@@ -114,7 +112,7 @@ def main():
 
     update_parser = actions_parser.add_parser(
         name="update",
-        parents=[generic_parser, start_restart_parser],
+        parents=[generic_parser, start_restart_parser, warn_parser],
         add_help=False,
         description="Updates the server to the newest available version",
         help="updates the server",
