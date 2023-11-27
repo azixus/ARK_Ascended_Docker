@@ -12,8 +12,9 @@ enable_battleye = true
 SessionName = "My Awesome ASA Server"
 ServerPassword = "MyServerPassword"
 ServerAdminPassword = "MyArkAdminPassword"
-
 Port = 7790
+
+# Leave RCON enabled to use the manager
 RCONPort = 32330
 RCONEnabled = true
 
@@ -101,7 +102,7 @@ start_type = "LINUX_PROTON" # LINUX_NATIVE
 # Static settings
 [ark.advanced]
 pid_file = "/opt/arkserver/.server.pid"
-schedule_file = "/opt/arkserver/.scheduled.action"
+schedule_file = "/opt/arkserver/.schedule.conf"
 log_file = "/opt/arkserver/ShooterGame/Saved/Logs/ShooterGame.log"
 manager_log_file = "/opt/arkserver/manager.log"
 ini_rel_dir = "ShooterGame/Saved/Config/WindowsServer"

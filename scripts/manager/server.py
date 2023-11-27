@@ -44,6 +44,14 @@ def update(
         None
     """
     logger.debug("-------STARTING UPDATE-------")
+
+    # Ensure thare are no pending actions
+    if (sche := get_scheduled_action(config)) != ScheduledAction.NONE:
+        logger.warning(
+            "[yellow]There is already an action in progress: %s[/]", sche.name
+        )
+        return
+
     # If server running, ask user unless force is True or warn is True
     pid = is_server_running(config)
     if pid:
@@ -253,7 +261,7 @@ def restart(
         logger.warning("[yellow]Server is not running.[/]")
         return
 
-    if sche := get_scheduled_action(config) != ScheduledAction.NONE:
+    if (sche := get_scheduled_action(config)) != ScheduledAction.NONE:
         logger.warning(
             "[yellow]There is already an action in progress: %s[/]", sche.name
         )
@@ -285,6 +293,13 @@ def stop(config: dict, saveworld: bool = False, warn: bool = False, **kwargs: an
     pid = is_server_running(config)
     if pid is None:
         logger.warning("[yellow]Server is not running.[/]")
+        return
+
+    # Ensure thare are no pending actions
+    if (sche := get_scheduled_action(config)) != ScheduledAction.NONE:
+        logger.warning(
+            "[yellow]There is already an action in progress: %s[/]", sche.name
+        )
         return
 
     # If warn is requested, run warnings in background
@@ -333,10 +348,21 @@ def stop(config: dict, saveworld: bool = False, warn: bool = False, **kwargs: an
 
 def do_warn(config: dict, warn_type: str) -> bool:
     try:
-        warn_config: list = config["ark"]["warn"][warn_type]
+        warn_config = config["ark"]["warn"][warn_type]
     except KeyError:
         logger.error("[red]Failed to read warn configuration.[/]")
         sys.exit(1)  # Exit process immediately
+
+    match warn_type:
+        case "restart":
+            action = ScheduledAction.RESTARTING
+        case "stop":
+            action = ScheduledAction.STOPPING
+        case "update":
+            action = ScheduledAction.UPDATING
+        case _:
+            logger.error("[red]Invalid type of warning.[/]")
+            sys.exit(1)  # Exit process immediately
 
     # Daemonize process
     logger.info("[green]Starting background process to warn players.[/]")
@@ -350,4 +376,4 @@ def do_warn(config: dict, warn_type: str) -> bool:
 
     # We are now in a background process
     # Wait and display warning(s)
-    sleep_and_warn(config, warn_config)
+    sleep_and_warn(config, warn_config, action)
