@@ -45,3 +45,17 @@ jobs:
           push: true
           tags: azixus/ark-ascended-docker:latest
           labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Build and push Docker image for unraid
+        uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
+        with:
+          context: .
+          build-args: |
+            PUID=99
+            PGID=100
+            TINI_VERSION=v0.19.0
+          file: ./Dockerfile
+          push: true
+          tags: azixus/ark-ascended-docker:unraid
+          labels: ${{ steps.meta.outputs.labels }}
+
