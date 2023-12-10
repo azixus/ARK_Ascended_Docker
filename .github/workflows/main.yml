@@ -52,7 +52,7 @@ jobs:
           context: .
           build-args: |
             PUID=99
-            PGID=100
+            PGID=99
             TINI_VERSION=v0.19.0
           file: ./Dockerfile
           push: true

@@ -27,7 +27,8 @@ FROM        debian:bullseye-slim
 ARG         PUID
 ARG         PGID
 
-RUN         groupadd -g $PGID arkuser && useradd -d /home/arkuser -u $PUID -g $PGID -m arkuser
+# Use users group for unraid
+RUN         groupadd -g $PGID arkuser && useradd -d /home/arkuser -u $PUID -g $PGID -G users -m arkuser
 RUN         mkdir /opt/arkserver
 
 RUN         set -ex; \
