@@ -3,3 +3,5 @@
 ark_data
 !ark_data/ShooterGame/Saved/Config/WindowsServer/Game.ini
 !ark_data/ShooterGame/Saved/Config/WindowsServer/GameUserSettings.ini
+ark_backup
+!ark_backup/.gitkeep
