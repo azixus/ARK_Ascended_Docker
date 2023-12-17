@@ -12,13 +12,13 @@ $ sudo chown -R 1000:1000 ./ark_*/
 ```
 
 Before starting the container, edit the [.env](./.env) file to customize the starting parameters of the server. You may also edit [Game.ini](./ark_data/ShooterGame/Saved/Config/WindowsServer/Game.ini) and [GameUserSettings.ini](./ark_data/ShooterGame/Saved/Config/WindowsServer/GameUserSettings.ini) for additional settings. Once this is done, start the container as follow:
-```
+```bash
 $ docker compose up -d
 ```
 
 During the startup of the container, the ASA server is automatically downloaded with `steamcmd` and subsequently started. You can monitor the progress with the following command:
 ```bash
-$ docker compose logs -f
+$ ./manager.sh logs -f
 asa_server  |[2023.10.31-17.06.19:714][  0]Log file open, 10/31/23 17:06:19
 asa_server  |[2023.10.31-17.06.19:715][  0]LogMemory: Platform Memory Stats for WindowsServer
 asa_server  |[2023.10.31-17.06.19:715][  0]LogMemory: Process Physical Memory: 319.32 MB used, 323.19 MB peak
@@ -99,8 +99,23 @@ Players:        0 / ?
 Server is up
 ```
 
-You can obtain more information with the `--full` flag which queries the Epic Online Services by extracting the API credentials from the server binaries.
+**Server logs**\
+_You can optionally use `./manager logs -f` to follow the logs as they are printed._
+```bash
+$ ./manager.sh logs
+ark_ascended_docker-asa_server-1  | Connecting anonymously to Steam Public...OK
+ark_ascended_docker-asa_server-1  | Waiting for client config...OK
+ark_ascended_docker-asa_server-1  | Waiting for user info...OK
+ark_ascended_docker-asa_server-1  |  Update state (0x3) reconfiguring, progress: 0.00 (0 / 0)
+ark_ascended_docker-asa_server-1  |  Update state (0x61) downloading, progress: 0.00 (0 / 9371487164)
+ark_ascended_docker-asa_server-1  |  Update state (0x61) downloading, progress: 0.60 (56039216 / 9371487164)
+ark_ascended_docker-asa_server-1  |  Update state (0x61) downloading, progress: 0.93 (86770591 / 9371487164)
+ark_ascended_docker-asa_server-1  |  Update state (0x61) downloading, progress: 1.76 (164837035 / 9371487164)
+# ... full logs will show
 ```
+
+You can obtain more information with the `--full` flag which queries the Epic Online Services by extracting the API credentials from the server binaries.
+```bash
 ./manager.sh status --full                                             
 To display the full status, the EOS API credentials will have to be extracted from the server binary files and pdb-sym2addr-rs (azixus/pdb-sym2addr-rs) will be downloaded. Do you want to proceed [y/n]?: y
 Server PID:     109
