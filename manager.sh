@@ -11,8 +11,8 @@ fi
 
 # Get the container id first. This is somewhat necessary since the next command
 # does not use docker compose.
-container=$($sudo_cmd docker compose -f "$script_dir/docker-compose.yml" ps -q asa_server)
+container=$(${sudo_cmd[@]} docker compose -f "$script_dir/docker-compose.yml" ps -q asa_server)
 
 # Use docker exec, instead of docker compose exec as the latter does not
 # override env variables.
-$sudo_cmd docker exec -it --env-file "$script_dir/.env" "$container" manager "${@}"
+${sudo_cmd[@]} docker exec -it --env-file "$script_dir/.env" "$container" manager "${@}"
