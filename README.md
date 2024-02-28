@@ -100,7 +100,7 @@ Server is up
 ```
 
 **Server logs**\
-_You can optionally use `./manager logs -f` to follow the logs as they are printed._
+_You can optionally use `./manager.sh logs -f` to follow the logs as they are printed._
 ```bash
 $ ./manager.sh logs
 ark_ascended_docker-asa_server-1  | Connecting anonymously to Steam Public...OK
