@@ -76,6 +76,7 @@ If you want to run a cluster with two or more containers running at the same tim
 - First setup all instances according to the [usage](https://github.com/azixus/ARK_Ascended_Docker/edit/cluster/README.md#usage) and [configuration](https://github.com/azixus/ARK_Ascended_Docker/edit/cluster/README.md#configuration) steps.
 - Edit the [.env](./.env) file in every instance accordingly
   - Set the **port** to a different one for each instance, eg 7777, 7778, 7779 etc.
+  - Edit `SERVER_MAP` to the map you want the server to run eg (`TheIsland_WP`, `ScorchedEarth_WP` etc)
   - Add line `COMPOSE_PROJECT_NAME=aprojectname` somewhere in the [.env](./.env) file with a different name for each instance. Please only use small letters, underscores and numbers.
   - Add `-clusterID=[yourclusterid]` to the `ARK_EXTRA_DASH_OPTS` with the same `clusterID` for every instance you want to cluster. The `clusterID` should be a random combination of letters and numbers, don't use special characters. The line should somewhat look like this:
     ```
