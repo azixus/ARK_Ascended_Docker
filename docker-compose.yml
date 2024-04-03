@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   asa_server:
     tty: true
