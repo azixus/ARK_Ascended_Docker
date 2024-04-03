@@ -2,13 +2,22 @@
 
 This project relies on GloriousEggroll's Proton-GE in order to run the ARK Survival Ascended Server inside a docker container under Linux. This allows to run the ASA Windows server binaries on Linux easily.
 
+<!-- TOC start (generated with https://github.com/derlin/bitdowntoc) -->
+### Table of Contents
+- [Usage](#usage)
+- [Configuration](#configuration)
+   * [Configuration variables](#configuration-variables)
+- [Running multiple instances (cluster)](#running-multiple-instances-cluster)
+- [Manager commands](#manager-commands)
+- [Hypervisors](#hypervisors)
 
+<!-- TOC end -->
 ### Usage
 Download the container by cloning the repo and setting permissions:
 ```bash
 $ git clone https://github.com/AziXus/ARK_Ascended_Docker.git
 $ cd ARK_Ascended_Docker
-$ sudo chown -R 1000:1000 ./ark_*/
+$ sudo chown -R 1000:1000 .ark_*/
 ```
 
 Before starting the container, edit the [.env](./.env) file to customize the starting parameters of the server. You may also edit [Game.ini](./ark_data/ShooterGame/Saved/Config/WindowsServer/Game.ini) and [GameUserSettings.ini](./ark_data/ShooterGame/Saved/Config/WindowsServer/GameUserSettings.ini) for additional settings. Once this is done, start the container as follow:
@@ -60,6 +69,20 @@ We list some configuration options that may be used to customize the server belo
 | ARK_EXTRA_DASH_OPTS | Extra dash arguments to add to the startup command. | -ForceAllowCaveFlyers -ForceRespawnDinos -AllowRaidDinoFeeding=true -ActiveEvent=Summer |
 
 To increase the available server memory, in [docker-compose.yml](./docker-compose.yml), increase the `deploy, resources, limits, memory: 16g` to a higher value.
+
+### Running multiple instances (cluster)
+If you want to run a cluster with two or more containers running at the same time, you will have to be aware of some things you have to change: 
+- Clone this repository into two different directories like `git clone https://github.com/azixus/ARK_Ascended_Docker.git folder1` and `git clone https://github.com/azixus/ARK_Ascended_Docker.git folder2`
+- First setup all instances according to the [usage](https://github.com/azixus/ARK_Ascended_Docker/edit/cluster/README.md#usage) and [configuration](https://github.com/azixus/ARK_Ascended_Docker/edit/cluster/README.md#configuration) steps.
+- Edit the [.env](./.env) file in every instance accordingly
+  - Set the **port** to a different one for each instance, eg 7777, 7778, 7779 etc.
+  - Add line `COMPOSE_PROJECT_NAME=aprojectname` somewhere in the [.env](./.env) file with a different name for each instance. Please only use small letters, underscores and numbers.
+  - Add `-clusterID=[yourclusterid]` to the `ARK_EXTRA_DASH_OPTS` with the same `clusterID` for every instance you want to cluster. The `clusterID` should be a random combination of letters and numbers, don't use special characters. The line should somewhat look like this:
+    ```
+    ARK_EXTRA_DASH_OPTS=-ForceAllowCaveFlyers -ForceRespawnDinos -AllowRaidDinoFeeding=true -ActiveEvent=Summer -clusterID=thisisarandomid
+    ```
+- Be sure that you have at least about **28-32GB** of memory available, especially if you use any mods
+- Start every instance with `docker compose up -d` and enjoy your clustered ASA server :)
 
 ### Manager commands
 The manager script supports several commands that we highlight below. 
