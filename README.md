@@ -75,12 +75,12 @@ If you want to run a cluster with two or more containers running at the same tim
 - Clone this repository into two different directories like `git clone https://github.com/azixus/ARK_Ascended_Docker.git folder1` and `git clone https://github.com/azixus/ARK_Ascended_Docker.git folder2`
 - First setup all instances according to the [usage](https://github.com/azixus/ARK_Ascended_Docker/edit/cluster/README.md#usage) and [configuration](https://github.com/azixus/ARK_Ascended_Docker/edit/cluster/README.md#configuration) steps.
 - Create a folder in a directory of your choosing, e.g., `mkdir -p /opt/clusters`. This folder will be used by both instances to transfer player data.
-- Edit the [docker-compose.yml](./docker-compose.yml) file in every instance by adding a volume for the newly created folder. The updated volume section should look as follows:
+- Edit the [docker-compose.yml](./docker-compose.yml) file in every instance by adding a volume for the newly created folder. The updated volume section should look as follows (focus on `/opt/clusters....`:
   ```yaml
   volumes:
     - ./ark_data:/opt/arkserver
     - ./ark_backup:/var/backups/asa-server
-    - /opt/clusters:/opt/shared-cluster#<-- This means that data in the container saved in the local /opt/clusters folder get's saved on your host in the previously created /opt/clusters folder
+    - /opt/clusters:/opt/shared-cluster
     - steam_data:/opt/steamcmd
   ```
 - Edit the [.env](./.env) file in every instance accordingly
