@@ -47,12 +47,16 @@ STEAM_COMPAT_DATA_PATH=$(eval echo "$STEAM_COMPAT_DATA_PATH")
 # if AUTO_RESTART is set, restart server if exit code is not 0
 while true; do
     #starting server and outputting log file
-    proton run /opt/arkserver/ShooterGame/Binaries/Win64/ArkAscendedServer.exe ${cmd} ${ark_flags} > /dev/null 2>&1
-    if [ -n "${AUTO_RESTART}" ] && [ $? -ne 0 ]; then
-        echo "Server crashed, restarting in 10 seconds..."
+    if proton run /opt/arkserver/ShooterGame/Binaries/Win64/ArkAscendedServer.exe ${cmd} ${ark_flags} > /dev/null 2>&1
+    then
+        echo "Server stopped"
+        break
+    elif [ -n "${AUTO_RESTART}" ]
+    then
+        echo "Server crashed, restarting in 10 seconds"
         sleep 10
     else
-        echo "Server stopped"
+        echo "Server crashed"
         break
     fi
 done
