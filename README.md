@@ -54,19 +54,21 @@ Unlike ARK Survival Evolved, only one port must be exposed to the internet, name
 #### Configuration variables
 We list some configuration options that may be used to customize the server below. Quotes in the `.env` file must not be used in most circumstances, you should only use them for certain flags such as `-BanListURL="http://banlist"`.
 
-| Name | Description | Default |
-| --- | --- | --- |
-| SERVER_MAP | Server map. | TheIsland_WP |
-| SESSION_NAME | Name of the server. | My Awesome ASA Server |
-| SERVER_PORT | Server listening port. | 7790 |
-| MAX_PLAYERS | Maximum number of players. | 10 |
-| SERVER_PASSWORD | Password required to join the server. Comment the variable to disable it. | MyServerPassword |
-| ARK_ADMIN_PASSWORD | Password required for cheats and RCON. | MyArkAdminPassword |
-| RCON_PORT | Port used to connect through RCON. To access RCON remotely, uncomment `#- "${RCON_PORT}:${RCON_PORT}/tcp"` in `docker-compose.yml`. | 32330 |
-| DISABLE_BATTLEYE | Comment to enable BattlEye on the server. | BattlEye Disabled |
-| MODS | Comma-separated list of mods to install on the server. | Disabled |
-| ARK_EXTRA_OPTS | Extra ?Argument=Value to add to the startup command. | ?ServerCrosshair=true?OverrideStructurePlatformPrevention=true?OverrideOfficialDifficulty=5.0?ShowFloatingDamageText=true?AllowFlyerCarryPvE=true |
-| ARK_EXTRA_DASH_OPTS | Extra dash arguments to add to the startup command. | -ForceAllowCaveFlyers -ForceRespawnDinos -AllowRaidDinoFeeding=true -ActiveEvent=Summer |
+| Name                | Description                                                                                                                         | Default                                                                                                                                           |
+|---------------------|-------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------|
+| SERVER_MAP          | Server map.                                                                                                                         | TheIsland_WP                                                                                                                                      |
+| SESSION_NAME        | Name of the server.                                                                                                                 | My Awesome ASA Server                                                                                                                             |
+| SERVER_PORT         | Server listening port.                                                                                                              | 7790                                                                                                                                              |
+| MAX_PLAYERS         | Maximum number of players.                                                                                                          | 10                                                                                                                                                |
+| SERVER_PASSWORD     | Password required to join the server. Comment the variable to disable it.                                                           | MyServerPassword                                                                                                                                  |
+| ARK_ADMIN_PASSWORD  | Password required for cheats and RCON.                                                                                              | MyArkAdminPassword                                                                                                                                |
+| RCON_PORT           | Port used to connect through RCON. To access RCON remotely, uncomment `#- "${RCON_PORT}:${RCON_PORT}/tcp"` in `docker-compose.yml`. | 32330                                                                                                                                             |
+| DISABLE_BATTLEYE    | Comment to enable BattlEye on the server.                                                                                           | BattlEye Disabled                                                                                                                                 |
+| MODS                | Comma-separated list of mods to install on the server.                                                                              | Disabled                                                                                                                                          |
+| MAP_MODS            | Comma-separated list of mods to additionally install. Useful when multiple instances share MODS except the map mod                  | Disabled                                                                                                                                          |
+| ARK_EXTRA_OPTS      | Extra ?Argument=Value to add to the startup command.                                                                                | ?ServerCrosshair=true?OverrideStructurePlatformPrevention=true?OverrideOfficialDifficulty=5.0?ShowFloatingDamageText=true?AllowFlyerCarryPvE=true |
+| ARK_EXTRA_DASH_OPTS | Extra dash arguments to add to the startup command.                                                                                 | -ForceAllowCaveFlyers -ForceRespawnDinos -AllowRaidDinoFeeding=true -ActiveEvent=Summer                                                           |
+| AUTO_RESTART        | Enable automatic restarts on crashes.                                                                                               | Disabled                                                                                                                                          |
 
 To increase the available server memory, in [docker-compose.yml](./docker-compose.yml), increase the `deploy, resources, limits, memory: 16g` to a higher value.
 
