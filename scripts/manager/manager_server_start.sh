@@ -21,10 +21,23 @@ fi
 
 cmd="${cmd}${ARK_EXTRA_OPTS}"
 
+# append MODS and MAP_MODS to mods, separated by comma if both are set
+mods=""
+if [ -n "${MAP_MODS}" ]; then
+    mods="${MAP_MODS}"
+fi
+if [ -n "${MODS}" ]; then
+    if [ -n "${mods}" ]; then
+        mods="${mods},${MODS}"
+    else
+        mods="${MODS}"
+    fi
+fi
+
 # Server dash options
 # Install mods
-if [ -n "$MODS" ]; then
-    ark_flags="${ark_flags} -mods=${MODS}"
+if [ -n "${mods}" ]; then
+    ark_flags="${ark_flags} -mods=${mods}"
 fi
 
 ark_flags="${ark_flags} -log"
